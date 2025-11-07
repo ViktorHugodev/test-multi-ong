@@ -9,13 +9,13 @@ export class OrdersRepository extends BaseRepository<Order> {
     super(prisma);
   }
 
-  getModel() {
+  override getModel() {
     return this.prisma.order;
   }
 
   async findByCustomer(customerId: string): Promise<Order[]> {
     return this.prisma.order.findMany({
-      where: { customerId, deletedAt: null },
+      where: { customerId },
       include: {
         items: {
           include: {
@@ -25,6 +25,94 @@ export class OrdersRepository extends BaseRepository<Order> {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async findManyByCustomer(customerId: string, page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: { customerId },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.order.count({
+        where: { customerId },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  }
+
+  async findManyByOrganization(organizationId: string, page = 1, pageSize = 20) {
+    const skip = (page - 1) * pageSize;
+    
+    const [items, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where: {
+          items: {
+            some: {
+              organizationId,
+            },
+          },
+        },
+        include: {
+          items: {
+            where: {
+              organizationId,
+            },
+            include: {
+              product: true,
+            },
+          },
+          customer: {
+            select: {
+              id: true,
+              email: true,
+              fullName: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      this.prisma.order.count({
+        where: {
+          items: {
+            some: {
+              organizationId,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        page,
+        pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
   }
 
   async findByIdWithItems(orderId: string): Promise<Order | null> {

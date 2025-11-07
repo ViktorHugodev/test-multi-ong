@@ -22,7 +22,7 @@ import { DatabaseModule } from '../database/database.module';
           process.env.JWT_SECRET ||
           'default-secret-change-in-production',
         signOptions: {
-          expiresIn: configService.get<string>('jwt.expiresIn') || '7d',
+          expiresIn: '7d' as const,
         },
       }),
     }),
