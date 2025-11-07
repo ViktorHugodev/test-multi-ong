@@ -1,15 +1,17 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bull';
+import { OrdersController, OrganizationOrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
-import { OrdersController } from './orders.controller';
 import { OrdersRepository } from './orders.repository';
-import { DatabaseModule } from '../../database/database.module';
-import { AuthModule } from '../../auth/auth.module';
-import { ProductsModule } from '../products/products.module';
 
 @Module({
-  imports: [DatabaseModule, AuthModule, ProductsModule],
-  controllers: [OrdersController],
+  imports: [
+    BullModule.registerQueue({
+      name: 'payment',
+    }),
+  ],
+  controllers: [OrdersController, OrganizationOrdersController],
   providers: [OrdersService, OrdersRepository],
-  exports: [OrdersService, OrdersRepository],
+  exports: [OrdersService],
 })
 export class OrdersModule {}
