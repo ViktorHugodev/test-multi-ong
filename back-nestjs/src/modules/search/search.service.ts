@@ -108,9 +108,9 @@ export class SearchService {
     });
 
     const total = logs.length;
-    const aiSuccessRate = (logs.filter((l) => l.aiSuccess).length / total) * 100;
-    const avgLatency =
-      logs.reduce((sum, l) => sum + l.latency, 0) / total;
+    const aiSuccessRate =
+      (logs.filter((l) => l.aiSuccess).length / total) * 100;
+    const avgLatency = logs.reduce((sum, l) => sum + l.latency, 0) / total;
 
     return {
       total,

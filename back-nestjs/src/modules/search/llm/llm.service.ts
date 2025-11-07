@@ -29,7 +29,9 @@ export class LlmService {
         filters.maxPrice = parseFloat(priceMatch[1]);
       }
 
-      const minPriceMatch = query.match(/(?:above|over|more than|>)\s*\$?(\d+)/i);
+      const minPriceMatch = query.match(
+        /(?:above|over|more than|>)\s*\$?(\d+)/i,
+      );
       if (minPriceMatch) {
         filters.minPrice = parseFloat(minPriceMatch[1]);
       }
@@ -38,14 +40,18 @@ export class LlmService {
       const categories = ['artesanato', 'doces', 'decoracao', 'alimentos'];
       for (const category of categories) {
         if (query.toLowerCase().includes(category)) {
-          filters.category = category.charAt(0).toUpperCase() + category.slice(1);
+          filters.category =
+            category.charAt(0).toUpperCase() + category.slice(1);
           break;
         }
       }
 
       // Clean query for text search (remove price and category mentions)
-      let searchText = query
-        .replace(/(?:under|below|less than|above|over|more than)\s*\$?\d+/gi, '')
+      const searchText = query
+        .replace(
+          /(?:under|below|less than|above|over|more than)\s*\$?\d+/gi,
+          '',
+        )
         .replace(new RegExp(categories.join('|'), 'gi'), '')
         .trim();
 
@@ -53,7 +59,9 @@ export class LlmService {
         filters.search = searchText;
       }
 
-      this.logger.log(`LLM parsed query: "${query}" -> ${JSON.stringify(filters)}`);
+      this.logger.log(
+        `LLM parsed query: "${query}" -> ${JSON.stringify(filters)}`,
+      );
 
       return {
         success: true,

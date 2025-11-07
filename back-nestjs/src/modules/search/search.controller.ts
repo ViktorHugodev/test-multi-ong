@@ -19,8 +19,6 @@ export class SearchController {
   @Public()
   @Get('analytics')
   async analytics(@Query('limit') limit?: string) {
-    return this.searchService.getAnalytics(
-      limit ? parseInt(limit, 10) : 100,
-    );
+    return this.searchService.getAnalytics(limit ? parseInt(limit, 10) : 100);
   }
 }

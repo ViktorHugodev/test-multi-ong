@@ -17,9 +17,7 @@ import { Public } from '../../auth/decorators/public.decorator';
 @Controller('organizations')
 @UseGuards(JwtAuthGuard)
 export class OrganizationsController {
-  constructor(
-    private readonly organizationsService: OrganizationsService,
-  ) {}
+  constructor(private readonly organizationsService: OrganizationsService) {}
 
   @Post()
   create(@Body() createOrganizationDto: CreateOrganizationDto) {

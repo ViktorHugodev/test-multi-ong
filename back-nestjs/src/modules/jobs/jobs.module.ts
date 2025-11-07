@@ -18,10 +18,7 @@ import { DatabaseModule } from '../../database/database.module';
         },
       }),
     }),
-    BullModule.registerQueue(
-      { name: 'payment' },
-      { name: 'notification' },
-    ),
+    BullModule.registerQueue({ name: 'payment' }, { name: 'notification' }),
   ],
   providers: [PaymentProcessor, NotificationProcessor],
   exports: [BullModule],

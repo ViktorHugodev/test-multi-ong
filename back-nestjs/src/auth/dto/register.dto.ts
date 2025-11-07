@@ -1,4 +1,12 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum, ValidateNested, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsEnum,
+  ValidateNested,
+  Length,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class OrganizationDto {

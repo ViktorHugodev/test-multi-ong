@@ -54,9 +54,7 @@ export class PaymentProcessor {
    * Simulate payment gateway integration
    * In production, integrate with Stripe, PayPal, etc.
    */
-  private async simulatePaymentGateway(
-    data: PaymentJobData,
-  ): Promise<void> {
+  private async simulatePaymentGateway(data: PaymentJobData): Promise<void> {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 2000));
 

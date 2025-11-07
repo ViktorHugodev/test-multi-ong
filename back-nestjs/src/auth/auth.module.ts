@@ -17,7 +17,10 @@ import { DatabaseModule } from '../database/database.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret') || process.env.JWT_SECRET || 'default-secret-change-in-production',
+        secret:
+          configService.get<string>('jwt.secret') ||
+          process.env.JWT_SECRET ||
+          'default-secret-change-in-production',
         signOptions: {
           expiresIn: configService.get<string>('jwt.expiresIn') || '7d',
         },

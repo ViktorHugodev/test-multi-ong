@@ -31,18 +31,12 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(
-    @Param('id') id: string,
-    @CurrentUser('id') customerId: string,
-  ) {
+  findOne(@Param('id') id: string, @CurrentUser('id') customerId: string) {
     return this.ordersService.findOne(id, customerId);
   }
 
   @Patch(':id/cancel')
-  cancel(
-    @Param('id') id: string,
-    @CurrentUser('id') customerId: string,
-  ) {
+  cancel(@Param('id') id: string, @CurrentUser('id') customerId: string) {
     return this.ordersService.cancelOrder(id, customerId);
   }
 }
