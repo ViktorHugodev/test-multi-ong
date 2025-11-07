@@ -25,7 +25,7 @@ async function main() {
       email: 'manager@artesaosesperanca.org',
       passwordHash,
       fullName: 'João Silva',
-      role: 'ONG_MANAGER',
+      role: 'ong_manager',
       organizationId: org1.id,
     },
   });
@@ -63,7 +63,7 @@ async function main() {
       email: 'manager@doceriasolidaria.org',
       passwordHash,
       fullName: 'Maria Santos',
-      role: 'ONG_MANAGER',
+      role: 'ong_manager',
       organizationId: org2.id,
     },
   });
@@ -91,7 +91,7 @@ async function main() {
       email: 'customer@example.com',
       passwordHash,
       fullName: 'Cliente Teste',
-      role: 'CUSTOMER',
+      role: 'customer',
     },
   });
 
