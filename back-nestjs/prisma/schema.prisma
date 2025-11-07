@@ -8,15 +8,46 @@ datasource db {
 }
 
 // ============================================
-// ETAPA 1 - Entidades Principais
+// USERS & AUTH
+// ============================================
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String    @map("password_hash")
+  fullName       String    @map("full_name")
+  role           UserRole
+  organizationId String?   @map("organization_id")
+  isActive       Boolean   @default(true) @map("is_active")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  orders       Order[]
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+enum UserRole {
+  admin
+  ong_manager
+  ong_staff
+  customer
+}
+
+// ============================================
+// ORGANIZATIONS (ONGs)
 // ============================================
 
 model Organization {
   id          String    @id @default(uuid())
   name        String
   slug        String    @unique
-  email       String    @unique
   description String?
+  email       String    @unique
+  phone       String?
   logoUrl     String?   @map("logo_url")
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -29,33 +60,9 @@ model Organization {
   @@map("organizations")
 }
 
-enum UserRole {
-  ADMIN
-  ONG_MANAGER
-  ONG_STAFF
-  CUSTOMER
-}
-
-model User {
-  id             String    @id @default(uuid())
-  organizationId String?   @map("organization_id")
-  email          String    @unique
-  passwordHash   String    @map("password_hash")
-  fullName       String    @map("full_name")
-  role           UserRole  @default(CUSTOMER)
-  isActive       Boolean   @default(true) @map("is_active")
-  emailVerified  DateTime? @map("email_verified_at")
-  lastLoginAt    DateTime? @map("last_login_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
-  deletedAt      DateTime? @map("deleted_at")
-
-  organization Organization? @relation(fields: [organizationId], references: [id])
-  orders       Order[]
-
-  @@index([organizationId])
-  @@map("users")
-}
+// ============================================
+// PRODUCTS
+// ============================================
 
 model Product {
   id             String    @id @default(uuid())
@@ -67,8 +74,8 @@ model Product {
   imageUrl       String?   @map("image_url")
   stockQty       Int       @map("stock_qty")
   weightGrams    Int       @map("weight_grams")
-  isActive       Boolean   @default(true) @map("is_active")
   sku            String?
+  isActive       Boolean   @default(true) @map("is_active")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
   deletedAt      DateTime? @map("deleted_at")
@@ -76,84 +83,83 @@ model Product {
   organization Organization @relation(fields: [organizationId], references: [id])
   orderItems   OrderItem[]
 
-  @@unique([organizationId, sku])
   @@index([organizationId])
   @@index([category])
   @@index([isActive, stockQty])
   @@map("products")
 }
 
-enum OrderStatus {
-  PENDING
-  PAYMENT_PROCESSING
-  PAYMENT_FAILED
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
+// ============================================
+// ORDERS
+// ============================================
 
 model Order {
   id              String      @id @default(uuid())
-  customerId      String      @map("customer_id")
   orderNumber     String      @unique @map("order_number")
-  status          OrderStatus @default(PENDING)
-  totalAmount     Decimal     @db.Decimal(10, 2) @map("total_amount")
-  shippingCost    Decimal     @default(0) @db.Decimal(10, 2) @map("shipping_cost")
-  shippingDetails Json        @map("shipping_details")
-  paymentMethod   String?     @map("payment_method")
-  paymentDetails  Json?       @map("payment_details")
-  notes           String?
+  customerId      String      @map("customer_id")
+  status          OrderStatus
+  totalAmount     Decimal     @map("total_amount") @db.Decimal(10, 2)
+  shippingCost    Decimal?    @map("shipping_cost") @db.Decimal(10, 2)
+  shippingDetails Json?       @map("shipping_details")
+  paymentMethod   String      @map("payment_method")
+  transactionId   String?     @map("transaction_id")
   idempotencyKey  String?     @unique @map("idempotency_key")
+  paidAt          DateTime?   @map("paid_at")
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
-  confirmedAt     DateTime?   @map("confirmed_at")
-  cancelledAt     DateTime?   @map("cancelled_at")
+  deletedAt       DateTime?   @map("deleted_at")
 
   customer User        @relation(fields: [customerId], references: [id])
   items    OrderItem[]
 
   @@index([customerId])
   @@index([status])
-  @@index([createdAt])
   @@map("orders")
+}
+
+enum OrderStatus {
+  pending
+  payment_processing
+  confirmed
+  failed
+  cancelled
 }
 
 model OrderItem {
   id             String   @id @default(uuid())
   orderId        String   @map("order_id")
-  organizationId String   @map("organization_id")
   productId      String   @map("product_id")
+  organizationId String   @map("organization_id")
   productName    String   @map("product_name")
-  productPrice   Decimal  @db.Decimal(10, 2) @map("product_price")
+  productPrice   Decimal  @map("product_price") @db.Decimal(10, 2)
   quantity       Int
   subtotal       Decimal  @db.Decimal(10, 2)
-  shippingCost   Decimal  @default(0) @db.Decimal(10, 2) @map("shipping_cost")
   weightGrams    Int      @map("weight_grams")
   createdAt      DateTime @default(now()) @map("created_at")
 
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
 
   @@index([orderId])
-  @@index([organizationId])
   @@index([productId])
+  @@index([organizationId])
   @@map("order_items")
 }
 
+// ============================================
+// SEARCH LOGS
+// ============================================
+
 model SearchLog {
-  id               String   @id @default(uuid())
-  userId           String?  @map("user_id")
-  searchQuery      String   @map("search_query")
-  aiInterpretation Json?    @map("ai_interpretation")
-  aiSuccess        Boolean  @map("ai_success")
-  fallbackUsed     Boolean  @map("fallback_used")
-  resultsCount     Int      @default(0) @map("results_count")
-  latencyMs        Int?     @map("latency_ms")
-  createdAt        DateTime @default(now()) @map("created_at")
+  id            String   @id @default(uuid())
+  query         String
+  filters       Json?
+  aiSuccess     Boolean  @map("ai_success")
+  fallbackUsed  Boolean  @map("fallback_used")
+  latency       Int
+  resultsCount  Int      @map("results_count")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   @@index([createdAt])
-  @@index([aiSuccess])
   @@map("search_logs")
 }
