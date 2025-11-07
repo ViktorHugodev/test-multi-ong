@@ -1,26 +1,26 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
-import { Public } from '../../auth/decorators/public.decorator';
+import { IsString } from 'class-validator';
 
-@Controller('search')
+class SearchDto {
+  @IsString()
+  query: string;
+}
+
+@Controller('public/search')
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
-  @Public()
-  @Get()
-  async search(@Query('q') query: string) {
-    if (!query) {
-      return { error: 'Query parameter "q" is required' };
-    }
-
-    return this.searchService.search(query);
-  }
-
-  @Public()
-  @Get('analytics')
-  async analytics(@Query('limit') limit?: string) {
-    return this.searchService.getAnalytics(
-      limit ? parseInt(limit, 10) : 100,
+  @Post()
+  async search(
+    @Body() dto: SearchDto,
+    @Query('page') page = 1,
+    @Query('pageSize') pageSize = 20,
+  ) {
+    return this.searchService.intelligentSearch(
+      dto.query,
+      Number(page),
+      Number(pageSize),
     );
   }
 }
