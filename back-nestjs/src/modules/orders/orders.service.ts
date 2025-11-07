@@ -8,7 +8,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 import { OrdersRepository } from './orders.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import type { Queue } from 'bull';
 
 @Injectable()
 export class OrdersService {
@@ -86,6 +86,7 @@ export class OrdersService {
         // 4. CALCULATE TOTAL
         const totalAmount = dto.items.reduce((sum, item) => {
           const product = products.find((p) => p.id === item.productId);
+          if (!product) return sum;
           return sum + Number(product.price) * item.quantity;
         }, 0);
 
@@ -105,6 +106,7 @@ export class OrdersService {
         // 6. CREATE ORDER ITEMS + ATOMIC STOCK DECREMENT
         for (const item of dto.items) {
           const product = products.find((p) => p.id === item.productId);
+          if (!product) continue;
 
           await tx.orderItem.create({
             data: {

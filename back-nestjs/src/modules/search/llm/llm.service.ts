@@ -16,9 +16,9 @@ export class LLMService {
   private readonly timeout: number;
 
   constructor(private config: ConfigService) {
-    this.apiUrl = this.config.get('LLM_API_URL');
-    this.apiKey = this.config.get('LLM_API_KEY');
-    this.timeout = this.config.get('LLM_TIMEOUT', 3000);
+    this.apiUrl = this.config.get<string>('LLM_API_URL') || '';
+    this.apiKey = this.config.get<string>('LLM_API_KEY') || '';
+    this.timeout = this.config.get<number>('LLM_TIMEOUT', 3000);
   }
 
   async extractFilters(query: string): Promise<SearchFilters> {
