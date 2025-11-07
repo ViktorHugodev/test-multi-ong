@@ -42,9 +42,7 @@ export class NotificationProcessor {
       // Send email based on type
       await this.sendEmail(job.data.type, order);
 
-      this.logger.log(
-        `Email sent successfully for order: ${job.data.orderId}`,
-      );
+      this.logger.log(`Email sent successfully for order: ${job.data.orderId}`);
 
       return { success: true, orderId: job.data.orderId };
     } catch (error) {
@@ -59,10 +57,7 @@ export class NotificationProcessor {
    * Send email notification
    * In production, integrate with SendGrid, AWS SES, etc.
    */
-  private async sendEmail(
-    type: string,
-    order: any,
-  ): Promise<void> {
+  private async sendEmail(type: string, order: any): Promise<void> {
     // Simulate email sending delay
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -82,9 +77,7 @@ export class NotificationProcessor {
     };
 
     const template = templates[type];
-    this.logger.log(
-      `Email to ${order.customer.email}: ${template.subject}`,
-    );
+    this.logger.log(`Email to ${order.customer.email}: ${template.subject}`);
 
     // In production, actually send email here
     // await emailService.send({ to: order.customer.email, ...template });
@@ -92,9 +85,7 @@ export class NotificationProcessor {
 
   @Process('send-sms')
   async handleSmsNotification(job: Job<NotificationJobData>) {
-    this.logger.log(
-      `Sending SMS notification for order: ${job.data.orderId}`,
-    );
+    this.logger.log(`Sending SMS notification for order: ${job.data.orderId}`);
 
     // Simulate SMS sending
     await new Promise((resolve) => setTimeout(resolve, 500));

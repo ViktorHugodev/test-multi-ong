@@ -4,7 +4,10 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser, CurrentUserData } from './decorators/current-user.decorator';
+import {
+  CurrentUser,
+  CurrentUserData,
+} from './decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {

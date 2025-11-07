@@ -48,9 +48,7 @@ export class OrganizationsService {
   async findBySlug(slug: string) {
     const organization = await this.organizationsRepository.findBySlug(slug);
     if (!organization) {
-      throw new NotFoundException(
-        `Organization with slug ${slug} not found`,
-      );
+      throw new NotFoundException(`Organization with slug ${slug} not found`);
     }
     return organization;
   }

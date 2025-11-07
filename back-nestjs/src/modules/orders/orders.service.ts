@@ -50,9 +50,7 @@ export class OrdersService {
         });
 
         if (!product) {
-          throw new NotFoundException(
-            `Product ${item.productId} not found`,
-          );
+          throw new NotFoundException(`Product ${item.productId} not found`);
         }
 
         if (!product.isActive) {
@@ -155,9 +153,7 @@ export class OrdersService {
     const order = await this.findOne(id, customerId);
 
     if (order.status !== 'pending') {
-      throw new BadRequestException(
-        'Only pending orders can be cancelled',
-      );
+      throw new BadRequestException('Only pending orders can be cancelled');
     }
 
     // Return stock to products
