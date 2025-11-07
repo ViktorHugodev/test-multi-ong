@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bull';
 import { APP_FILTER, APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 
 // Config
@@ -27,6 +28,12 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, databaseConfig, jwtConfig, redisConfig],
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: Number(process.env.REDIS_PORT) || 6379,
+      },
     }),
     DatabaseModule,
     AuthModule,
