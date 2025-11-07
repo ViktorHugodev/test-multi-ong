@@ -1,97 +1,49 @@
 import { Processor, Process } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
-import type { Job } from 'bull';
-import { PrismaService } from '../../../database/prisma/prisma.service';
-
-export interface NotificationJobData {
-  orderId: string;
-  customerId: string;
-  type: 'order_created' | 'order_confirmed' | 'order_cancelled';
-}
+import { Job } from 'bull';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Processor('notification')
+@Injectable()
 export class NotificationProcessor {
   private readonly logger = new Logger(NotificationProcessor.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  @Process('notify-customer')
+  async handleCustomerNotification(
+    job: Job<{ orderId: string; type: string; email?: string }>,
+  ) {
+    const { orderId, type, email } = job.data;
 
-  @Process('send-email')
-  async handleEmailNotification(job: Job<NotificationJobData>) {
     this.logger.log(
-      `Sending ${job.data.type} email for order: ${job.data.orderId}`,
+      `[Job ${job.id}] Sending ${type} notification to customer for order ${orderId}`,
     );
 
-    try {
-      // Fetch order and customer details
-      const order = await this.prisma.order.findUnique({
-        where: { id: job.data.orderId },
-        include: {
-          customer: true,
-          items: {
-            include: {
-              product: true,
-            },
-          },
-        },
-      });
-
-      if (!order) {
-        throw new Error(`Order ${job.data.orderId} not found`);
-      }
-
-      // Send email based on type
-      await this.sendEmail(job.data.type, order);
-
-      this.logger.log(`Email sent successfully for order: ${job.data.orderId}`);
-
-      return { success: true, orderId: job.data.orderId };
-    } catch (error) {
-      this.logger.error(
-        `Failed to send email for order ${job.data.orderId}: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Send email notification
-   * In production, integrate with SendGrid, AWS SES, etc.
-   */
-  private async sendEmail(type: string, order: any): Promise<void> {
-    // Simulate email sending delay
+    // SIMULATE EMAIL SENDING
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const templates = {
-      order_created: {
-        subject: `Order Confirmed - ${order.orderNumber}`,
-        body: `Your order has been created successfully!`,
-      },
-      order_confirmed: {
-        subject: `Payment Confirmed - ${order.orderNumber}`,
-        body: `Your payment has been confirmed. Thank you!`,
-      },
-      order_cancelled: {
-        subject: `Order Cancelled - ${order.orderNumber}`,
-        body: `Your order has been cancelled.`,
-      },
-    };
+    this.logger.log(
+      `[Job ${job.id}] Customer notification sent: ${type} to ${email || 'customer'}`,
+    );
 
-    const template = templates[type];
-    this.logger.log(`Email to ${order.customer.email}: ${template.subject}`);
-
-    // In production, actually send email here
-    // await emailService.send({ to: order.customer.email, ...template });
+    return { sent: true, type };
   }
 
-  @Process('send-sms')
-  async handleSmsNotification(job: Job<NotificationJobData>) {
-    this.logger.log(`Sending SMS notification for order: ${job.data.orderId}`);
+  @Process('notify-organization')
+  async handleOrganizationNotification(
+    job: Job<{ orderId: string; organizationId: string; type: string }>,
+  ) {
+    const { orderId, organizationId, type } = job.data;
 
-    // Simulate SMS sending
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    this.logger.log(
+      `[Job ${job.id}] Sending ${type} notification to organization ${organizationId}`,
+    );
 
-    this.logger.log(`SMS sent for order: ${job.data.orderId}`);
+    // SIMULATE NOTIFICATION
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    return { success: true };
+    this.logger.log(
+      `[Job ${job.id}] Organization notification sent: ${type} to ${organizationId}`,
+    );
+
+    return { sent: true, type };
   }
 }
