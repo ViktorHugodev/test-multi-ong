@@ -84,44 +84,93 @@ Este roadmap organiza o desenvolvimento do Marketplace Multi-ONG em fases, segui
 
 ---
 
-### Sprint 4: Sistema de Pedidos (Backend) 🔄 PRÓXIMA
+### Sprint 4: Sistema de Pedidos (Backend) ✅ COMPLETO
 
 **Backend:**
-- [ ] Modelo OrderItem e relacionamentos
-- [ ] Endpoint POST /orders (criar pedido)
-- [ ] Endpoint GET /orders (listar meus pedidos)
-- [ ] Endpoint GET /orders/:id (detalhes do pedido)
-- [ ] Validação de estoque ao criar pedido
-- [ ] Cálculo automático de totais
-- [ ] Status de pedido (PENDING, PAID, SHIPPED, DELIVERED, CANCELLED)
+- [x] Modelo OrderItem e relacionamentos
+- [x] Endpoint POST /orders (criar pedido)
+- [x] Endpoint GET /orders (listar meus pedidos)
+- [x] Endpoint GET /orders/:id (detalhes do pedido)
+- [x] Validação de estoque ao criar pedido
+- [x] Cálculo automático de totais
+- [x] Status de pedido (pending, payment_processing, confirmed, failed, cancelled)
+- [x] **Pessimistic locking** com FOR UPDATE
+- [x] **Serializable isolation** em transações
+- [x] **Price snapshot** em OrderItem
+- [x] **Atomic stock decrement**
+- [x] **Idempotency key** para prevenir pedidos duplicados
+- [x] **Async payment processing** com BullMQ
 
 **Frontend:**
-- [ ] Hook useCart (Zustand ou Context) ✅ JÁ CRIADO
-- [ ] Estrutura básica de types para pedidos
+- [x] Hook useCart (Zustand + localStorage)
+- [x] Estrutura completa de types para pedidos
 
 ---
 
-### Sprint 5: Carrinho & Checkout (Frontend) ⏳ PENDENTE
+### Sprint 5: Carrinho & Checkout ✅ COMPLETO
+
+**Backend:**
+- [x] OrderService com todas as funcionalidades avançadas
+- [x] CreateOrderDto com validações completas
+- [x] OrderController com endpoints protegidos
+- [x] Race condition prevention (pessimistic locks)
 
 **Frontend:**
-- [ ] Página de carrinho completa
-  - [ ] Lista de itens com imagem, nome, preço, quantidade
-  - [ ] Botão para remover itens
-  - [ ] Atualização de quantidade
-  - [ ] Cálculo de subtotal e total
-- [ ] Página de checkout
-  - [ ] Formulário de endereço de entrega
-  - [ ] Resumo do pedido
-  - [ ] Botão "Finalizar Pedido"
-- [ ] Validação de estoque em tempo real
-- [ ] Página de confirmação de pedido
-- [ ] Integração com API de pedidos
+- [x] **CartSummary component** - Resumo reutilizável do pedido
+- [x] **Página de carrinho completa** (`/cart`)
+  - [x] Lista de itens com imagem, nome, preço, quantidade, organização
+  - [x] Controles de quantidade (+/-)
+  - [x] Botão para remover itens
+  - [x] Cálculo de subtotal e total
+  - [x] Empty state para carrinho vazio
+  - [x] Botão "Finalizar Compra"
+- [x] **Página de checkout** (`/checkout`)
+  - [x] Formulário completo de dados de entrega
+  - [x] Validação com Zod + React Hook Form
+  - [x] Seleção de método de pagamento (PIX, cartão de crédito/débito)
+  - [x] Resumo do pedido com itens
+  - [x] Botão "Finalizar Pedido" com loading state
+  - [x] Proteção por autenticação
+  - [x] Redirect para login se não autenticado
+- [x] **Página de sucesso** (`/order-success/[orderId]`)
+  - [x] Confirmação visual com CheckCircle
+  - [x] Detalhes completos do pedido
+  - [x] Status badge do pedido
+  - [x] Endereço de entrega
+  - [x] Informações de pagamento
+  - [x] Links para "Meus Pedidos" e "Continuar Comprando"
+- [x] **Página "Meus Pedidos"** (`/my-orders`)
+  - [x] Lista de todos os pedidos do usuário
+  - [x] Cards com resumo de cada pedido
+  - [x] Status badges coloridos
+  - [x] Preview dos itens (primeiros 3)
+  - [x] Botão "Ver Detalhes" por pedido
+  - [x] Empty state quando não há pedidos
+- [x] **Integração completa com API**
+  - [x] ordersApi.createOrder
+  - [x] ordersApi.getMyOrders
+  - [x] ordersApi.getOrderById
+  - [x] Tratamento de erros com toast notifications
+- [x] **Validações e proteções**
+  - [x] Verificar autenticação antes de checkout
+  - [x] Verificar carrinho vazio
+  - [x] Limitar quantidade por produto (baseado em stockQty)
+  - [x] Mensagens de erro claras
+  - [x] Idempotency key para prevenir duplicação
+- [x] **Componentes UI criados**
+  - [x] RadioGroup component (@radix-ui/react-radio-group)
+  - [x] CartSummary component reutilizável
+- [x] **Navegação**
+  - [x] Link "Meus Pedidos" no header (mobile e desktop)
+  - [x] Link "Meus Pedidos" no menu do usuário
 
-**Validações Importantes:**
-- [ ] Verificar estoque antes de permitir adicionar ao carrinho
-- [ ] Limitar quantidade máxima por produto
-- [ ] Exibir mensagens de erro claras
-- [ ] Impedir finalização com estoque insuficiente
+**Validações Implementadas:**
+- [x] Verificar estoque no backend (com locks)
+- [x] Limitar quantidade máxima por produto no frontend
+- [x] Exibir mensagens de erro claras (toast + inline)
+- [x] Impedir finalização com estoque insuficiente
+- [x] Validação de campos de formulário (CEP, telefone, etc.)
+- [x] Proteção contra race conditions no backend
 
 ---
 
@@ -217,7 +266,8 @@ Este roadmap organiza o desenvolvimento do Marketplace Multi-ONG em fases, segui
 - ✅ ONGs podem gerenciar seus produtos
 - ✅ Consumidores podem navegar e filtrar produtos
 - ✅ Consumidores podem ver detalhes dos produtos
-- ⏳ Consumidores podem adicionar produtos ao carrinho e finalizar pedidos
+- ✅ Consumidores podem adicionar produtos ao carrinho e finalizar pedidos
+- ✅ Consumidores podem visualizar seus pedidos
 - ⏳ Sistema possui logs estruturados
 
 ### Fase 2 (Arquitetura Avançada)
@@ -274,11 +324,11 @@ Este roadmap organiza o desenvolvimento do Marketplace Multi-ONG em fases, segui
 
 ## 🔄 Status Atual
 
-**Progresso Geral**: ~75% Fase 1 (MVP)
+**Progresso Geral**: ~90% Fase 1 (MVP)
 
-**Sprint Atual**: Sprint 3 ✅ COMPLETO
+**Sprint Atual**: Sprint 5 ✅ COMPLETO
 
-**Próxima Sprint**: Sprint 5 (Carrinho & Checkout Frontend)
+**Próxima Sprint**: Sprint 6 (Logs Estruturados)
 
 **Última Atualização**: 2025-11-11
 
@@ -286,14 +336,13 @@ Este roadmap organiza o desenvolvimento do Marketplace Multi-ONG em fases, segui
 
 ## 🚦 Próximos Passos
 
-1. **Sprint 5** - Implementar carrinho e checkout completo no frontend
-2. **Sprint 6** - Adicionar logs estruturados com Winston
-3. **Sprint 7** - Garantir consistência de estoque com locks
-4. **Sprint 8** - Implementar jobs assíncronos com BullMQ
-5. **Sprint 9** - Escolher e implementar feature avançada (Caching recomendado)
-6. **Testes** - Atingir 50%+ de coverage
-7. **Documentação** - README completo e docs técnicas
-8. **Deploy** - Ambiente de produção
+1. **Sprint 6** - Adicionar logs estruturados com Winston ⏳
+2. **Testes** - Atingir 50%+ de coverage
+3. **Documentação** - README completo e docs técnicas
+4. **Sprint 7** - (Opcional) Melhorias de consistência de estoque
+5. **Sprint 8** - (Opcional) Melhorias em processamento assíncrono
+6. **Sprint 9** - (Opcional) Feature avançada (Caching recomendado)
+7. **Deploy** - Ambiente de produção
 
 ---
 
