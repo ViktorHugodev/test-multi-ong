@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function Footer() {
   return (
     <footer className="border-t bg-background">
@@ -13,14 +15,14 @@ export function Footer() {
             <h3 className="font-semibold mb-3">Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/" className="text-muted-foreground hover:text-foreground">
+                <Link href="/" className="text-muted-foreground hover:text-foreground">
                   Produtos
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/my-orders" className="text-muted-foreground hover:text-foreground">
+                <Link href="/my-orders" className="text-muted-foreground hover:text-foreground">
                   Meus Pedidos
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -28,14 +30,14 @@ export function Footer() {
             <h3 className="font-semibold mb-3">Suporte</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
                   Contato
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
+                <Link href="#" className="text-muted-foreground hover:text-foreground">
                   FAQ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

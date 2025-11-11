@@ -42,7 +42,7 @@ export function RegisterForm() {
           },
         }),
       });
-    } catch (error) {
+    } catch {
       // Error handled by auth context
     } finally {
       setIsLoading(false);

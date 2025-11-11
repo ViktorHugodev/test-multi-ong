@@ -9,6 +9,7 @@ import { useCart } from '@/lib/hooks/use-cart';
 import { toast } from 'sonner';
 import { ShoppingCart, Package } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: Product;
@@ -29,10 +30,12 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardHeader className="p-0">
         <div className="aspect-square bg-muted relative overflow-hidden">
           {product.imageUrl ? (
-            <img
+            <Image
               src={product.imageUrl}
               alt={product.name}
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             />
           ) : (
             <div className="flex items-center justify-center h-full">

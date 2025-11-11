@@ -5,6 +5,7 @@ import { User, AuthResponse } from '@/types/user.types';
 import { authApi, LoginDto, RegisterDto } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 interface AuthContextType {
   user: User | null;
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const userData = await authApi.getProfile();
           setUser(userData);
         } catch (error) {
+          console.error('Erro ao carregar perfil do usuário:', error);
           localStorage.removeItem('auth_token');
         }
       }
@@ -55,9 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         router.push('/');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
       toast.error('Erro no login', {
-        description: error.response?.data?.message || 'Credenciais inválidas',
+        description: axiosError.response?.data?.message || 'Credenciais inválidas',
       });
       throw error;
     }
@@ -78,9 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         router.push('/');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
       toast.error('Erro no cadastro', {
-        description: error.response?.data?.message || 'Erro ao criar conta',
+        description: axiosError.response?.data?.message || 'Erro ao criar conta',
       });
       throw error;
     }

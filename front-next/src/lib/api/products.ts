@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { Product, PaginatedResponse, ProductFilters } from '@/types/product.types';
+import { CreateProductDto, UpdateProductDto } from '@/lib/validations/product.schema';
 
 export const productsApi = {
   // Public endpoints
@@ -24,7 +25,7 @@ export const productsApi = {
     return response.data;
   },
 
-  createProduct: async (orgId: string, data: any) => {
+  createProduct: async (orgId: string, data: CreateProductDto) => {
     const response = await apiClient.post<Product>(
       `/organizations/${orgId}/products`,
       data
@@ -32,7 +33,7 @@ export const productsApi = {
     return response.data;
   },
 
-  updateProduct: async (orgId: string, id: string, data: any) => {
+  updateProduct: async (orgId: string, id: string, data: UpdateProductDto) => {
     const response = await apiClient.put<Product>(
       `/organizations/${orgId}/products/${id}`,
       data
