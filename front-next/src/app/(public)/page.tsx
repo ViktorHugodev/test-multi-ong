@@ -1,19 +1,36 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+
 import { productsApi } from '@/lib/api/products';
 import { ProductGrid } from '@/components/products/product-grid';
+import { ProductFilters } from '@/components/products/product-filters';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { ProductFilters as IProductFilters } from '@/types/product.types';
 
-export default function HomePage() {
-  const [page, setPage] = useState(1);
+const HomePage = () => {
+  const [filters, setFilters] = useState<IProductFilters>({
+    page: 1,
+    pageSize: 20,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page],
-    queryFn: () => productsApi.getPublicProducts({ page, pageSize: 12 }),
+    queryKey: ['products', filters],
+    queryFn: () => productsApi.getPublicProducts(filters),
   });
+
+  const handleFiltersChange = (newFilters: IProductFilters) => {
+    setFilters({ ...newFilters, page: 1 });
+  };
+
+  const handlePageChange = (page: number) => {
+    setFilters({ ...filters, page });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -24,49 +41,50 @@ export default function HomePage() {
         </p>
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="space-y-4">
-              <Skeleton className="aspect-square w-full" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="text-center py-12">
-          <p className="text-destructive text-lg">
-            Erro ao carregar produtos. Tente novamente mais tarde.
-          </p>
-        </div>
-      ) : data ? (
-        <>
-          <ProductGrid products={data.items} />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <aside className="lg:col-span-1">
+          <ProductFilters filters={filters} onFiltersChange={handleFiltersChange} />
+        </aside>
 
-          {data.meta.totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-8">
-              <Button
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                Anterior
-              </Button>
-              <div className="flex items-center px-4">
-                Página {page} de {data.meta.totalPages}
-              </div>
-              <Button
-                variant="outline"
-                disabled={page === data.meta.totalPages}
-                onClick={() => setPage(page + 1)}
-              >
-                Próxima
-              </Button>
+        <main className="lg:col-span-3">
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-destructive text-lg">
+                Erro ao carregar produtos. Tente novamente mais tarde.
+              </p>
+            </div>
+          ) : data && data.items.length > 0 ? (
+            <>
+              <ProductGrid products={data.items} />
+              <Pagination
+                currentPage={data.meta.page}
+                totalPages={data.meta.totalPages}
+                totalItems={data.meta.total}
+                pageSize={data.meta.pageSize}
+                onPageChange={handlePageChange}
+              />
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                Nenhum produto encontrado com os filtros selecionados
+              </p>
             </div>
           )}
-        </>
-      ) : null}
+        </main>
+      </div>
     </div>
   );
-}
+};
+
+export default HomePage;
