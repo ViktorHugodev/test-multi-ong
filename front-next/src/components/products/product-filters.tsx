@@ -21,12 +21,10 @@ interface IProductFiltersProps {
 }
 
 const CATEGORIES = [
-  'Alimentação',
-  'Artesanato',
-  'Vestuário',
-  'Acessórios',
-  'Decoração',
-  'Outros',
+  { value: 'apparel', label: 'Apparel' },
+  { value: 'home-goods', label: 'Home Goods' },
+  { value: 'accessories', label: 'Accessories' },
+  { value: 'food-drink', label: 'Food & Drink' },
 ];
 
 const SORT_OPTIONS = [
@@ -71,99 +69,89 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
   };
 
   return (
-    <Card className="border border-border shadow-sm rounded-lg sticky top-24">
-      <CardHeader className="py-6 px-6">
-        <CardTitle className="text-xl font-bold font-display">Filtros</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6 px-6 pb-6">
-        <div className="space-y-3">
-          <Label htmlFor="category" className="text-base font-semibold">
-            Categoria
-          </Label>
-          <Select
-            value={localFilters.category || ''}
-            onValueChange={(value) =>
-              setLocalFilters({ ...localFilters, category: value || undefined })
-            }
-          >
-            <SelectTrigger id="category" className="h-11">
-              <SelectValue placeholder="Todas as categorias" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
-              {CATEGORIES.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+    <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24 space-y-6">
+      <h3 className="text-lg font-bold text-gray-900">Filter Products</h3>
+      
+      {/* Categories */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-gray-900">Categories</h4>
+        <div className="space-y-2">
+          {CATEGORIES.map((category) => (
+            <label key={category.value} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={localFilters.category === category.value}
+                onChange={(e) =>
+                  setLocalFilters({
+                    ...localFilters,
+                    category: e.target.checked ? category.value : undefined,
+                  })
+                }
+                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
+              />
+              <span className="text-sm text-gray-700">{category.label}</span>
+            </label>
+          ))}
         </div>
+      </div>
 
-        <div className="space-y-3">
-          <Label className="text-base font-semibold">Faixa de Preço</Label>
-          <div className="flex gap-3 items-center">
-            <div className="flex-1">
-              <Input
-                type="number"
-                placeholder="Mín"
-                min={0}
-                className="h-11"
-                value={localFilters.priceMin ?? ''}
-                onChange={(e) =>
-                  setLocalFilters({
-                    ...localFilters,
-                    priceMin: e.target.value ? Number(e.target.value) : undefined,
-                  })
-                }
-              />
-            </div>
-            <span className="text-muted-foreground font-medium">até</span>
-            <div className="flex-1">
-              <Input
-                type="number"
-                placeholder="Máx"
-                min={0}
-                className="h-11"
-                value={localFilters.priceMax ?? ''}
-                onChange={(e) =>
-                  setLocalFilters({
-                    ...localFilters,
-                    priceMax: e.target.value ? Number(e.target.value) : undefined,
-                  })
-                }
-              />
-            </div>
+      {/* Price Range */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-gray-900">Price Range</h4>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">$10</span>
+            <input
+              type="range"
+              min="10"
+              max="150"
+              value={localFilters.priceMin ?? 10}
+              onChange={(e) =>
+                setLocalFilters({
+                  ...localFilters,
+                  priceMin: Number(e.target.value),
+                })
+              }
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+            />
+            <span className="text-sm text-gray-600">$150+</span>
           </div>
         </div>
+      </div>
 
-        <div className="space-y-3">
-          <Label htmlFor="sort" className="text-base font-semibold">
-            Ordenar por
-          </Label>
-          <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
-            <SelectTrigger id="sort" className="h-11">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Cause - placeholder for future implementation */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-semibold text-gray-900">Cause</h4>
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
+            />
+            <span className="text-sm text-gray-700">Environment</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
+            />
+            <span className="text-sm text-gray-700">Education</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
+            />
+            <span className="text-sm text-gray-700">Animal Welfare</span>
+          </label>
         </div>
+      </div>
 
-        <div className="flex gap-3 pt-4">
-          <Button onClick={handleApplyFilters} className="flex-1 h-11">
-            Aplicar Filtros
-          </Button>
-          <Button onClick={handleClearFilters} variant="outline" size="icon" className="h-11 w-11">
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="pt-4 border-t border-gray-200">
+        <Button onClick={handleApplyFilters} className="w-full">
+          Apply Filters
+        </Button>
+      </div>
+    </div>
   );
 }
