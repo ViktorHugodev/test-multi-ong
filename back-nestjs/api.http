@@ -1,0 +1,305 @@
+### Multi-ONG Marketplace API Tests
+### Base URL
+@baseUrl = http://localhost:3333/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNmRlMjk1Zi04MTk4LTQ0ODAtYmNhZC1kOWVlOTliYWJhZTkiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoiY3VzdG9tZXIiLCJvcmdhbml6YXRpb25JZCI6bnVsbCwiaWF0IjoxNzYyODgxMTM3LCJleHAiOjE3NjM0ODU5Mzd9.vbt3YOIABzp7gnkT_O5eOdYYTShgXSraelB1GadHCuo
+
+### ============================================
+### AUTHENTICATION
+### ============================================
+
+### Register - Customer
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "victor@gmail.com",
+  "password": "admin123",
+  "fullName": "Victor",
+  "role": "customer"
+}
+
+### Register - ONG Manager with Organization
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "manager@ong.com",
+  "password": "password123",
+  "fullName": "ONG Manager",
+  "role": "ong_manager",
+  "organization": {
+    "name": "ONG Exemplo",
+    "description": "Uma organização de exemplo para testes",
+    "email": "contato@ongexemplo.com",
+    "phone": "+5511999999999"
+  }
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "victor@gmail.com",
+  "password": "admin123"
+}
+
+### Get Current User Profile
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### ============================================
+### ORGANIZATIONS (PUBLIC)
+### ============================================
+
+### List All Organizations
+GET {{baseUrl}}/organizations
+
+### Get Organization by ID
+GET {{baseUrl}}/organizations/uuid-here
+
+### Get Organization by Slug
+GET {{baseUrl}}/organizations/slug/ong-exemplo
+
+### ============================================
+### ORGANIZATIONS (PRIVATE)
+### ============================================
+
+### Create Organization
+POST {{baseUrl}}/organizations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Nova ONG",
+  "slug": "nova-ong",
+  "description": "Descrição da nova ONG",
+  "email": "contato@novaong.com",
+  "phone": "+5511888888888",
+  "logoUrl": "https://example.com/logo.png"
+}
+
+### Update Organization
+PATCH {{baseUrl}}/organizations/uuid-here
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "ONG Atualizada",
+  "description": "Nova descrição",
+  "isActive": true
+}
+
+### Delete Organization
+DELETE {{baseUrl}}/organizations/uuid-here
+Authorization: Bearer {{token}}
+
+### ============================================
+### PRODUCTS (PRIVATE - ONG Management)
+### ============================================
+
+### Create Product
+POST {{baseUrl}}/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Teste",
+  "description": "Descrição do produto teste",
+  "price": 29.99,
+  "category": "alimentos",
+  "imageUrl": "https://example.com/product.jpg",
+  "stockQty": 100,
+  "weightGrams": 500,
+  "sku": "PROD-001"
+}
+
+### List Products (Organization)
+GET {{baseUrl}}/products
+Authorization: Bearer {{token}}
+
+### List Products with Filters
+GET {{baseUrl}}/products?category=alimentos&page=1&limit=10
+Authorization: Bearer {{token}}
+
+### List Products with Search
+GET {{baseUrl}}/products?search=teste&minPrice=10&maxPrice=50
+Authorization: Bearer {{token}}
+
+### Get Product by ID
+GET {{baseUrl}}/products/uuid-here
+Authorization: Bearer {{token}}
+
+### Update Product
+PATCH {{baseUrl}}/products/uuid-here
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Produto Atualizado",
+  "price": 39.99,
+  "stockQty": 50,
+  "isActive": true
+}
+
+### Delete Product
+DELETE {{baseUrl}}/products/uuid-here
+Authorization: Bearer {{token}}
+
+### ============================================
+### PRODUCTS (PUBLIC - Marketplace)
+### ============================================
+
+### List All Public Products
+GET {{baseUrl}}/public/products
+
+### List Public Products with Filters
+GET {{baseUrl}}/public/products?category=alimentos&page=1&limit=20
+
+### List Public Products by Organization
+GET {{baseUrl}}/public/products?organizationId=uuid-here
+
+### List Public Products with Price Range
+GET {{baseUrl}}/public/products?minPrice=10&maxPrice=100
+
+### List Public Products with Search
+GET {{baseUrl}}/public/products?search=orgânico
+
+### Get Public Product by ID
+GET {{baseUrl}}/public/products/uuid-here
+
+### ============================================
+### ORDERS (USER)
+### ============================================
+
+### Create Order
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": "uuid-product-1",
+      "quantity": 2
+    },
+    {
+      "productId": "uuid-product-2",
+      "quantity": 1
+    }
+  ],
+  "shippingDetails": {
+    "address": "Rua Exemplo, 123",
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "01234-567",
+    "recipientName": "João Silva",
+    "recipientPhone": "+5511999999999"
+  },
+  "paymentMethod": "credit_card",
+  "idempotencyKey": "unique-key-12345"
+}
+
+### Create Order (Minimal)
+POST {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": "uuid-product-1",
+      "quantity": 1
+    }
+  ],
+  "paymentMethod": "pix"
+}
+
+### List My Orders
+GET {{baseUrl}}/orders
+Authorization: Bearer {{token}}
+
+### List My Orders with Pagination
+GET {{baseUrl}}/orders?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Get Order by ID
+GET {{baseUrl}}/orders/uuid-here
+Authorization: Bearer {{token}}
+
+### ============================================
+### ORDERS (ORGANIZATION)
+### ============================================
+
+### List Organization Orders
+GET {{baseUrl}}/organizations/uuid-org-here/orders
+Authorization: Bearer {{token}}
+
+### List Organization Orders with Pagination
+GET {{baseUrl}}/organizations/uuid-org-here/orders?page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### ============================================
+### SEARCH
+### ============================================
+
+### Intelligent Search
+POST {{baseUrl}}/public/search
+Content-Type: application/json
+
+{
+  "query": "alimentos orgânicos"
+}
+
+### Intelligent Search with Pagination
+POST {{baseUrl}}/public/search?page=1&pageSize=20
+Content-Type: application/json
+
+{
+  "query": "produtos sustentáveis"
+}
+
+### ============================================
+### HEALTH CHECK
+### ============================================
+
+### Health Check
+GET {{baseUrl}}
+
+### ============================================
+### COMPLETE WORKFLOW EXAMPLE
+### ============================================
+
+### 1. Register as ONG Manager
+# POST {{baseUrl}}/auth/register
+# Save the token from response
+
+### 2. Login
+# POST {{baseUrl}}/auth/login
+# Update @token variable with the received token
+
+### 3. Get My Profile
+# GET {{baseUrl}}/auth/me
+
+### 4. Create Products
+# POST {{baseUrl}}/products
+# Save product IDs
+
+### 5. List My Products
+# GET {{baseUrl}}/products
+
+### 6. Register as Customer
+# POST {{baseUrl}}/auth/register
+# Update @token with customer token
+
+### 7. Browse Public Products
+# GET {{baseUrl}}/public/products
+
+### 8. Search Products
+# POST {{baseUrl}}/public/search
+
+### 9. Create Order
+# POST {{baseUrl}}/orders
+
+### 10. View My Orders
+# GET {{baseUrl}}/orders

@@ -32,7 +32,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = configService.get<number>('app.port') || 3000;
+  const port = configService.get<number>('app.port') || 3333;
   await app.listen(port);
 
   logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
