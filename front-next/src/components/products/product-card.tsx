@@ -14,39 +14,57 @@ interface IProductCardProps {
 
 export function ProductCard({ product }: IProductCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className="aspect-square relative bg-muted">
+    <Card className="group overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-lg">
+      <div className="aspect-square relative bg-muted overflow-hidden">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <Package className="h-16 w-16 text-muted-foreground" />
+            <Package className="h-20 w-20 text-muted-foreground" />
           </div>
         )}
         {product.stockQty === 0 && (
-          <Badge className="absolute top-2 right-2" variant="destructive">
+          <Badge className="absolute top-3 right-3 rounded-lg shadow-md" variant="destructive">
             Esgotado
           </Badge>
         )}
-      </div>
-      <CardContent className="p-4">
-        <Badge variant="secondary" className="mb-2">
-          {product.category}
-        </Badge>
-        <h3 className="font-semibold text-lg line-clamp-2 mt-2">{product.name}</h3>
-        <p className="text-2xl font-bold mt-2">{formatCurrency(product.price)}</p>
         {product.organization && (
-          <p className="text-sm text-muted-foreground mt-1">
-            por {product.organization.name}
-          </p>
+          <div className="absolute bottom-3 left-3">
+            <Badge
+              variant="secondary"
+              className="bg-white/95 dark:bg-background-dark/95 backdrop-blur-sm border border-border shadow-md rounded-lg"
+            >
+              {product.organization.name}
+            </Badge>
+          </div>
         )}
-        <Button asChild className="w-full mt-4">
+      </div>
+      <CardContent className="p-6 space-y-4">
+        <div className="space-y-2">
+          <Badge variant="secondary" className="rounded-lg">
+            {product.category}
+          </Badge>
+          <h3 className="font-semibold text-lg line-clamp-2 font-display leading-tight">
+            {product.name}
+          </h3>
+        </div>
+        <div className="space-y-1">
+          <p className="text-3xl font-bold text-primary font-display">
+            {formatCurrency(product.price)}
+          </p>
+          {product.stockQty > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {product.stockQty} em estoque
+            </p>
+          )}
+        </div>
+        <Button asChild className="w-full">
           <Link href={`/products/${product.id}`}>Ver Detalhes</Link>
         </Button>
       </CardContent>
