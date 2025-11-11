@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { Trash2, Minus, Plus } from 'lucide-react';
+import Image from 'next/image';
 
 interface CartItemProps {
   product: Product;
@@ -18,12 +19,14 @@ export function CartItem({ product, quantity, onUpdateQuantity, onRemove }: Cart
 
   return (
     <div className="flex gap-4 py-4 border-b">
-      <div className="w-24 h-24 bg-muted rounded flex-shrink-0">
+      <div className="w-24 h-24 bg-muted rounded flex-shrink-0 relative">
         {product.imageUrl ? (
-          <img
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover rounded"
+            fill
+            className="object-cover rounded"
+            sizes="96px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">

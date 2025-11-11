@@ -19,7 +19,7 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await login({ email, password });
-    } catch (error) {
+    } catch {
       // Error handled by auth context
     } finally {
       setIsLoading(false);
