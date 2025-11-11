@@ -2,9 +2,9 @@
 
 import { useCart } from '@/lib/hooks/use-cart';
 import { CartItem } from '@/components/cart/cart-item';
+import { CartSummary } from '@/components/cart/cart-summary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency } from '@/lib/utils/format-currency';
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
@@ -60,38 +60,7 @@ export default function CartPage() {
         </div>
 
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumo do Pedido</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="font-semibold">{formatCurrency(total)}</span>
-              </div>
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Frete</span>
-                <span>Calculado no checkout</span>
-              </div>
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button className="w-full" size="lg" asChild>
-                <Link href="/checkout">Finalizar Compra</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <div className="mt-4 text-center">
-            <Button variant="link" asChild>
-              <Link href="/">Continuar Comprando</Link>
-            </Button>
-          </div>
+          <CartSummary subtotal={total} />
         </div>
       </div>
     </div>
