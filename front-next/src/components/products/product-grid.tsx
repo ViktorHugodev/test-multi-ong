@@ -1,13 +1,11 @@
-'use client';
-
 import { Product } from '@/types/product.types';
 import { ProductCard } from './product-card';
 
-interface ProductGridProps {
+interface IProductGridProps {
   products: Product[];
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({ products }: IProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
