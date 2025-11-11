@@ -17,32 +17,38 @@ export const productsApi = {
   },
 
   // Private endpoints (ONG)
-  getMyProducts: async (orgId: string, filters?: ProductFilters) => {
+  // Note: orgId is automatically extracted from JWT token by the backend
+  getMyProducts: async (filters?: ProductFilters) => {
     const response = await apiClient.get<PaginatedResponse<Product>>(
-      `/organizations/${orgId}/products`,
+      '/products',
       { params: filters }
     );
     return response.data;
   },
 
-  createProduct: async (orgId: string, data: CreateProductDto) => {
+  getMyProductById: async (id: string) => {
+    const response = await apiClient.get<Product>(`/products/${id}`);
+    return response.data;
+  },
+
+  createProduct: async (data: CreateProductDto) => {
     const response = await apiClient.post<Product>(
-      `/organizations/${orgId}/products`,
+      '/products',
       data
     );
     return response.data;
   },
 
-  updateProduct: async (orgId: string, id: string, data: UpdateProductDto) => {
-    const response = await apiClient.put<Product>(
-      `/organizations/${orgId}/products/${id}`,
+  updateProduct: async (id: string, data: UpdateProductDto) => {
+    const response = await apiClient.patch<Product>(
+      `/products/${id}`,
       data
     );
     return response.data;
   },
 
-  deleteProduct: async (orgId: string, id: string) => {
-    const response = await apiClient.delete(`/organizations/${orgId}/products/${id}`);
+  deleteProduct: async (id: string) => {
+    const response = await apiClient.delete(`/products/${id}`);
     return response.data;
   },
 };
