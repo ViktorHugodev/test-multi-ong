@@ -71,20 +71,22 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Filtros</CardTitle>
+    <Card className="border border-border shadow-sm rounded-lg sticky top-24">
+      <CardHeader className="py-6 px-6">
+        <CardTitle className="text-xl font-bold font-display">Filtros</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="category">Categoria</Label>
+      <CardContent className="space-y-6 px-6 pb-6">
+        <div className="space-y-3">
+          <Label htmlFor="category" className="text-base font-semibold">
+            Categoria
+          </Label>
           <Select
             value={localFilters.category || ''}
             onValueChange={(value) =>
               setLocalFilters({ ...localFilters, category: value || undefined })
             }
           >
-            <SelectTrigger id="category">
+            <SelectTrigger id="category" className="h-11">
               <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
@@ -98,14 +100,15 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label>Faixa de Preço</Label>
-          <div className="flex gap-2 items-center">
+        <div className="space-y-3">
+          <Label className="text-base font-semibold">Faixa de Preço</Label>
+          <div className="flex gap-3 items-center">
             <div className="flex-1">
               <Input
                 type="number"
                 placeholder="Mín"
                 min={0}
+                className="h-11"
                 value={localFilters.priceMin ?? ''}
                 onChange={(e) =>
                   setLocalFilters({
@@ -115,12 +118,13 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
                 }
               />
             </div>
-            <span className="text-muted-foreground">até</span>
+            <span className="text-muted-foreground font-medium">até</span>
             <div className="flex-1">
               <Input
                 type="number"
                 placeholder="Máx"
                 min={0}
+                className="h-11"
                 value={localFilters.priceMax ?? ''}
                 onChange={(e) =>
                   setLocalFilters({
@@ -133,10 +137,12 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="sort">Ordenar por</Label>
+        <div className="space-y-3">
+          <Label htmlFor="sort" className="text-base font-semibold">
+            Ordenar por
+          </Label>
           <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
-            <SelectTrigger id="sort">
+            <SelectTrigger id="sort" className="h-11">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -149,12 +155,12 @@ export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProp
           </Select>
         </div>
 
-        <div className="flex gap-2 pt-2">
-          <Button onClick={handleApplyFilters} className="flex-1">
+        <div className="flex gap-3 pt-4">
+          <Button onClick={handleApplyFilters} className="flex-1 h-11">
             Aplicar Filtros
           </Button>
-          <Button onClick={handleClearFilters} variant="outline" size="icon">
-            <X className="h-4 w-4" />
+          <Button onClick={handleClearFilters} variant="outline" size="icon" className="h-11 w-11">
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </CardContent>
