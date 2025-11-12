@@ -1,108 +1,245 @@
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+// prisma/seed.ts
+// Seed completo e realista para testes
+// Executar com: npx prisma db seed
+
+import { PrismaClient, UserRole, OrderStatus } from "@prisma/client";
+import { faker } from "@faker-js/faker";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database...');
+  console.log("🌱 Iniciando seed...");
 
-  // Hash password
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // Limpando dados existentes para evitar duplicações
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.organization.deleteMany();
+  await prisma.searchLog.deleteMany();
 
-  // Criar ONG 1
-  const org1 = await prisma.organization.create({
-    data: {
-      name: 'Artesãos da Esperança',
-      slug: 'artesaos-esperanca',
-      email: 'contato@artesaosesperanca.org',
-      description: 'Promovendo o artesanato local',
-    },
+  // ============================================
+  // 1. Criar Organizações (ONGs)
+  // ============================================
+
+  const organizations = await prisma.organization.createMany({
+    data: [
+      {
+        name: "Ampara Animais",
+        slug: "ampara-animais",
+        description: "ONG de proteção animal",
+        email: "contato@amparaanimais.org",
+        phone: "11987654321",
+        logoUrl: faker.image.urlLoremFlickr({ category: "animal" }),
+      },
+      {
+        name: "Casa do Bem",
+        slug: "casa-do-bem",
+        description: "Assistência social para famílias carentes",
+        email: "contato@casadobem.org",
+        phone: "11911112222",
+        logoUrl: faker.image.urlLoremFlickr({ category: "people" }),
+      },
+      {
+        name: "Vida Verde",
+        slug: "vida-verde",
+        description: "Preservação ambiental e reflorestamento",
+        email: "contato@vidaverde.org",
+        phone: "11955554444",
+        logoUrl: faker.image.urlLoremFlickr({ category: "nature" }),
+      },
+      {
+        name: "Sorriso Feliz",
+        slug: "sorriso-feliz",
+        description: "Campanhas odontológicas gratuitas",
+        email: "contato@sorrisofeliz.org",
+        phone: "11944443333",
+        logoUrl: faker.image.urlLoremFlickr({ category: "health" }),
+      },
+      {
+        name: "Café Solidário",
+        slug: "cafe-solidario",
+        description: "Distribuição de alimentos em regiões vulneráveis",
+        email: "contato@cafesolidario.org",
+        phone: "11922223333",
+        logoUrl: faker.image.urlLoremFlickr({ category: "food" }),
+      },
+    ],
   });
 
-  // Criar usuário manager da ONG 1
-  await prisma.user.create({
-    data: {
-      email: 'manager@artesaosesperanca.org',
+  const orgs = await prisma.organization.findMany();
+
+  // ============================================
+  // 2. Criar Usuários
+  // ============================================
+
+  const passwordHash = "$2b$10$abcdefghijklmnopqrstuv"; // fake hash para testes
+
+  const usersData: Array<{
+    email: string;
+    passwordHash: string;
+    fullName: string;
+    role: UserRole;
+    organizationId: string | null;
+  }> = [];
+
+  for (const org of orgs) {
+    // Criar manager
+    usersData.push({
+      email: `manager@${org.slug}.org`,
       passwordHash,
-      fullName: 'João Silva',
-      role: 'ong_manager',
-      organizationId: org1.id,
-    },
+      fullName: `${org.name} Manager`,
+      role: UserRole.ong_manager,
+      organizationId: org.id,
+    });
+
+    // Criar staff
+    for (let i = 0; i < 3; i++) {
+      usersData.push({
+        email: faker.internet.email(),
+        passwordHash,
+        fullName: faker.person.fullName(),
+        role: UserRole.ong_staff,
+        organizationId: org.id,
+      });
+    }
+
+    // Criar clientes
+    for (let i = 0; i < 10; i++) {
+      usersData.push({
+        email: faker.internet.email(),
+        passwordHash,
+        fullName: faker.person.fullName(),
+        role: UserRole.customer,
+        organizationId: org.id,
+      });
+    }
+  }
+
+  // Admin global
+  usersData.push({
+    email: "admin@sistema.com",
+    passwordHash,
+    fullName: "Admin Geral",
+    role: UserRole.admin,
+    organizationId: null,
   });
 
-  // Criar produtos da ONG 1
-  const categories = ['Artesanato', 'Decoração'];
-  for (let i = 1; i <= 5; i++) {
-    await prisma.product.create({
+  await prisma.user.createMany({ data: usersData });
+  const users = await prisma.user.findMany();
+
+  // ============================================
+  // 3. Criar Produtos
+  // ============================================
+
+  const productsData: Array<{
+    organizationId: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+    imageUrl: string;
+    stockQty: number;
+    weightGrams: number;
+    sku: string;
+  }> = [];
+
+  for (const org of orgs) {
+    const categories = ["Food", "Clothes", "Toys", "Medicine", "Misc"];
+
+    for (let i = 0; i < 25; i++) {
+      const price = Number(faker.finance.amount({ min: 5, max: 250, dec: 2 }));
+
+      productsData.push({
+        organizationId: org.id,
+        name: faker.commerce.productName(),
+        description: faker.commerce.productDescription(),
+        price,
+        category: faker.helpers.arrayElement(categories),
+        imageUrl: faker.image.urlLoremFlickr(),
+        stockQty: faker.number.int({ min: 0, max: 200 }),
+        weightGrams: faker.number.int({ min: 50, max: 5000 }),
+        sku: faker.string.alphanumeric(8).toUpperCase(),
+      });
+    }
+  }
+
+  await prisma.product.createMany({ data: productsData });
+  const products = await prisma.product.findMany();
+
+  // ============================================
+  // 4. Criar Pedidos + Itens de Pedido
+  // ============================================
+
+  for (let i = 0; i < 200; i++) {
+    const customer = faker.helpers.arrayElement(users.filter(u => u.role === "customer"));
+    const org = orgs.find(o => o.id === customer.organizationId)!;
+    const productSample = faker.helpers.arrayElements(
+      products.filter(p => p.organizationId === org.id),
+      faker.number.int({ min: 1, max: 5 })
+    );
+
+    const order = await prisma.order.create({
       data: {
-        organizationId: org1.id,
-        name: `Artesanato ${i}`,
-        description: `Peça artesanal única feita à mão`,
-        price: 25.90 + i * 10,
-        category: categories[i % 2],
-        stockQty: 10 + i,
-        weightGrams: 200 + i * 50,
-        sku: `ART-00${i}`,
+        orderNumber: `ORD-${faker.string.numeric(8)}`,
+        customerId: customer.id,
+        status: faker.helpers.arrayElement(Object.values(OrderStatus)),
+        paymentMethod: faker.helpers.arrayElement(["pix", "credit_card", "debit_card", "boleto"]),
+        shippingCost: faker.finance.amount({ min: 0, max: 40, dec: 2 }),
+        totalAmount: 0,
+      },
+    });
+
+    let total = 0;
+
+    for (const p of productSample) {
+      const quantity = faker.number.int({ min: 1, max: 5 });
+      const subtotal = Number(p.price) * quantity;
+      total += subtotal;
+
+      await prisma.orderItem.create({
+        data: {
+          orderId: order.id,
+          productId: p.id,
+          organizationId: org.id,
+          productName: p.name,
+          productPrice: p.price,
+          quantity,
+          subtotal,
+          weightGrams: p.weightGrams,
+        },
+      });
+    }
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { totalAmount: total },
+    });
+  }
+
+  // ============================================
+  // 5. Criar Logs de Busca
+  // ============================================
+
+  const searchQueries = ["ração", "doação", "camiseta", "reflorestamento", "kit higiene"];
+
+  for (let i = 0; i < 500; i++) {
+    await prisma.searchLog.create({
+      data: {
+        query: faker.helpers.arrayElement(searchQueries),
+        filters: { category: faker.helpers.arrayElement(["Food", "Toys", "Medicine"]) },
+        aiSuccess: faker.datatype.boolean(),
+        fallbackUsed: faker.datatype.boolean(),
+        latency: faker.number.int({ min: 20, max: 800 }),
+        resultsCount: faker.number.int({ min: 0, max: 30 }),
       },
     });
   }
 
-  // Criar ONG 2
-  const org2 = await prisma.organization.create({
-    data: {
-      name: 'Doceria Solidária',
-      slug: 'doceria-solidaria',
-      email: 'contato@doceriasolidaria.org',
-      description: 'Doces artesanais para uma boa causa',
-    },
-  });
-
-  // Criar usuário manager da ONG 2
-  await prisma.user.create({
-    data: {
-      email: 'manager@doceriasolidaria.org',
-      passwordHash,
-      fullName: 'Maria Santos',
-      role: 'ong_manager',
-      organizationId: org2.id,
-    },
-  });
-
-  // Criar produtos da ONG 2
-  const doceCategories = ['Doces', 'Alimentos'];
-  for (let i = 1; i <= 5; i++) {
-    await prisma.product.create({
-      data: {
-        organizationId: org2.id,
-        name: `Doce ${i}`,
-        description: `Doce artesanal delicioso`,
-        price: 15.90 + i * 5,
-        category: doceCategories[i % 2],
-        stockQty: 20 + i,
-        weightGrams: 150 + i * 30,
-        sku: `DOC-00${i}`,
-      },
-    });
-  }
-
-  // Criar usuário customer
-  await prisma.user.create({
-    data: {
-      email: 'customer@example.com',
-      passwordHash,
-      fullName: 'Cliente Teste',
-      role: 'customer',
-    },
-  });
-
-  console.log('✅ Database seeded successfully!');
+  console.log("✅ Seed concluído com sucesso!");
 }
 
-main()
-  .catch((e) => {
-    console.error('❌ Seeding error:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch(e => {
+  console.error(e);
+  process.exit(1);
+});
