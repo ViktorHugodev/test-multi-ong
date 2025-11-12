@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useCart } from '@/lib/hooks/use-cart';
-import { ShoppingCart, Heart, Search, User } from 'lucide-react';
+import { ShoppingCart, Heart, Search, User, Package } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,

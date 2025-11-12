@@ -183,6 +183,7 @@ export default function MyOrdersPage() {
           Mostrando {orders.length} de {data.meta.total} pedidos
         </div>
       )}
+      </div>
     </div>
   );
 }
