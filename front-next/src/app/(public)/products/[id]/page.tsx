@@ -48,14 +48,16 @@ const ProductDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Skeleton className="aspect-square w-full" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <Skeleton className="aspect-square w-full rounded-lg" />
+            <div className="space-y-6">
+              <Skeleton className="h-12 w-3/4 rounded-lg" />
+              <Skeleton className="h-8 w-1/2 rounded-lg" />
+              <Skeleton className="h-32 w-full rounded-lg" />
+              <Skeleton className="h-14 w-full rounded-lg" />
+            </div>
           </div>
         </div>
       </div>
@@ -64,14 +66,16 @@ const ProductDetailPage = () => {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <p className="text-destructive text-lg mb-4">
-            Produto não encontrado ou erro ao carregar.
-          </p>
-          <Button asChild>
-            <Link href="/">Voltar para o Marketplace</Link>
-          </Button>
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-12">
+          <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm">
+            <p className="text-destructive text-2xl font-semibold mb-6">
+              Produto não encontrado ou erro ao carregar.
+            </p>
+            <Button asChild size="lg">
+              <Link href="/">Voltar para o Marketplace</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
