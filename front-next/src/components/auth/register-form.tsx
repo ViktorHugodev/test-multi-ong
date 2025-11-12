@@ -51,15 +51,15 @@ export function RegisterForm() {
 
   return (
     <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Cadastro</CardTitle>
-        <CardDescription>Crie sua conta para começar</CardDescription>
+      <CardHeader className="py-6 px-6">
+        <CardTitle className="text-2xl font-bold font-display">Cadastro</CardTitle>
+        <CardDescription className="text-base">Crie sua conta para começar</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Nome Completo</Label>
+      <CardContent className="px-6 pb-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="fullName" className="text-base font-semibold">Nome Completo</Label>
               <Input
                 id="fullName"
                 type="text"
@@ -69,8 +69,8 @@ export function RegisterForm() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-base font-semibold">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -82,9 +82,9 @@ export function RegisterForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-base font-semibold">Senha</Label>
               <Input
                 id="password"
                 type="password"
@@ -95,8 +95,8 @@ export function RegisterForm() {
                 minLength={6}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Tipo de Conta</Label>
+            <div className="space-y-3">
+              <Label htmlFor="role" className="text-base font-semibold">Tipo de Conta</Label>
               <Select
                 value={formData.role}
                 onValueChange={(value: 'customer' | 'ong_manager') =>
@@ -116,12 +116,12 @@ export function RegisterForm() {
 
           {formData.role === 'ong_manager' && (
             <>
-              <div className="border-t pt-4">
-                <h3 className="font-semibold mb-4">Dados da Organização</h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="orgName">Nome da ONG</Label>
+              <div className="border-t border-border pt-6">
+                <h3 className="text-xl font-bold font-display mb-6">Dados da Organização</h3>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="orgName" className="text-base font-semibold">Nome da ONG</Label>
                       <Input
                         id="orgName"
                         type="text"
@@ -131,8 +131,8 @@ export function RegisterForm() {
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="orgEmail">Email da ONG</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="orgEmail" className="text-base font-semibold">Email da ONG</Label>
                       <Input
                         id="orgEmail"
                         type="email"
@@ -143,8 +143,8 @@ export function RegisterForm() {
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="orgPhone">Telefone (opcional)</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="orgPhone" className="text-base font-semibold">Telefone (opcional)</Label>
                     <Input
                       id="orgPhone"
                       type="tel"
@@ -153,8 +153,8 @@ export function RegisterForm() {
                       onChange={(e) => setFormData({ ...formData, orgPhone: e.target.value })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="orgDescription">Descrição (opcional)</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="orgDescription" className="text-base font-semibold">Descrição (opcional)</Label>
                     <Textarea
                       id="orgDescription"
                       placeholder="Conte um pouco sobre sua organização..."
@@ -168,13 +168,13 @@ export function RegisterForm() {
             </>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
             {isLoading ? 'Criando conta...' : 'Criar Conta'}
           </Button>
 
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-base text-center text-muted-foreground">
             Já tem uma conta?{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:text-primary/90 transition-colors">
               Faça login
             </Link>
           </p>

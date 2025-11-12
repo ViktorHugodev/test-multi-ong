@@ -25,6 +25,7 @@ export function LoginForm() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
       {/* Logo */}
       <div className="flex justify-center mb-6">
@@ -66,6 +67,29 @@ export function LoginForm() {
           </label>
           <div className="relative">
             <input
+=======
+    <Card className="w-full max-w-md">
+      <CardHeader className="py-6 px-6">
+        <CardTitle className="text-2xl font-bold font-display">Login</CardTitle>
+        <CardDescription className="text-base">Entre com sua conta para continuar</CardDescription>
+      </CardHeader>
+      <CardContent className="px-6 pb-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-base font-semibold">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-3">
+            <Label htmlFor="password" className="text-base font-semibold">Senha</Label>
+            <Input
+>>>>>>> 49a9e53cf178f1c56368740d47de586e26b29201
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Enter your password"
@@ -86,6 +110,7 @@ export function LoginForm() {
               )}
             </button>
           </div>
+<<<<<<< HEAD
         </div>
 
         <button
@@ -104,5 +129,19 @@ export function LoginForm() {
         </p>
       </form>
     </div>
+=======
+          <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+            {isLoading ? 'Entrando...' : 'Entrar'}
+          </Button>
+          <p className="text-base text-center text-muted-foreground">
+            Não tem uma conta?{' '}
+            <Link href="/register" className="text-primary hover:text-primary/90 transition-colors">
+              Cadastre-se
+            </Link>
+          </p>
+        </form>
+      </CardContent>
+    </Card>
+>>>>>>> 49a9e53cf178f1c56368740d47de586e26b29201
   );
 }
