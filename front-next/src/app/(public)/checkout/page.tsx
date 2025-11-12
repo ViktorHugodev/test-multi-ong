@@ -98,26 +98,29 @@ export default function CheckoutPage() {
 
   if (authLoading || items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16 text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Finalizar Compra</h1>
+    <div className="bg-background-light dark:bg-background min-h-screen">
+      <div className="container mx-auto px-6 md:px-8 py-12">
+        <h1 className="text-4xl md:text-5xl font-bold font-display mb-8">Finalizar Compra</h1>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Formulário de entrega */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Dados de entrega */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Dados de Entrega</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Formulário de entrega */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Dados de entrega */}
+              <Card>
+                <CardHeader className="py-6 px-6">
+                  <CardTitle className="text-2xl font-bold font-display">Dados de Entrega</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 px-6 pb-6">
                 <div>
                   <Label htmlFor="recipientName">Nome Completo do Destinatário</Label>
                   <Input
@@ -199,15 +202,16 @@ export default function CheckoutPage() {
 
             {/* Método de pagamento */}
             <Card>
-              <CardHeader>
-                <CardTitle>Método de Pagamento</CardTitle>
+              <CardHeader className="py-6 px-6">
+                <CardTitle className="text-2xl font-bold font-display">Método de Pagamento</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-6 pb-6">
                 <RadioGroup
                   defaultValue="pix"
                   onValueChange={(value) => setValue('paymentMethod', value as any)}
+                  className="space-y-4"
                 >
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
+                  <div className="flex items-center space-x-4 p-4 border-2 border-border rounded-lg hover:bg-accent hover:border-primary/50 transition-colors cursor-pointer">
                     <RadioGroupItem value="pix" id="pix" />
                     <Label htmlFor="pix" className="flex-1 cursor-pointer">
                       <div className="flex items-center gap-2">
@@ -222,13 +226,13 @@ export default function CheckoutPage() {
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
+                  <div className="flex items-center space-x-4 p-4 border-2 border-border rounded-lg hover:bg-accent hover:border-primary/50 transition-colors cursor-pointer">
                     <RadioGroupItem value="credit_card" id="credit_card" />
                     <Label htmlFor="credit_card" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5" />
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-6 w-6" />
                         <div>
-                          <p className="font-semibold">Cartão de Crédito</p>
+                          <p className="font-semibold text-base">Cartão de Crédito</p>
                           <p className="text-sm text-muted-foreground">
                             Parcelamento disponível
                           </p>
@@ -237,13 +241,13 @@ export default function CheckoutPage() {
                     </Label>
                   </div>
 
-                  <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent cursor-pointer">
+                  <div className="flex items-center space-x-4 p-4 border-2 border-border rounded-lg hover:bg-accent hover:border-primary/50 transition-colors cursor-pointer">
                     <RadioGroupItem value="debit_card" id="debit_card" />
                     <Label htmlFor="debit_card" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5" />
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-6 w-6" />
                         <div>
-                          <p className="font-semibold">Cartão de Débito</p>
+                          <p className="font-semibold text-base">Cartão de Débito</p>
                           <p className="text-sm text-muted-foreground">À vista</p>
                         </div>
                       </div>
@@ -260,21 +264,21 @@ export default function CheckoutPage() {
           </div>
 
           {/* Resumo do pedido */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Resumo do Pedido</CardTitle>
+          <div>
+            <Card className="sticky top-24">
+              <CardHeader className="py-6 px-6">
+                <CardTitle className="text-2xl font-bold font-display">Resumo do Pedido</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6 px-6 pb-6">
                 {/* Items */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {items.map((item) => (
-                    <div key={item.product.id} className="flex gap-3 text-sm">
+                    <div key={item.product.id} className="flex gap-4 text-base">
                       <div className="flex-1">
-                        <p className="font-medium">{item.product.name}</p>
+                        <p className="font-semibold">{item.product.name}</p>
                         <p className="text-muted-foreground">Qtd: {item.quantity}</p>
                       </div>
-                      <p className="font-semibold">
+                      <p className="font-bold">
                         {formatCurrency(Number(item.product.price) * item.quantity)}
                       </p>
                     </div>
@@ -284,45 +288,45 @@ export default function CheckoutPage() {
                 <Separator />
 
                 {/* Totals */}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-base">
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-semibold">{formatCurrency(total)}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Frete</span>
-                    <span>Grátis</span>
+                  <div className="flex justify-between text-base">
+                    <span className="text-muted-foreground">Frete</span>
+                    <span className="font-semibold text-green-600">Grátis</span>
                   </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex justify-between text-lg font-bold">
+                <div className="flex justify-between text-2xl font-bold font-display">
                   <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span className="text-primary">{formatCurrency(total)}</span>
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 text-base"
                   size="lg"
                   disabled={createOrderMutation.isPending}
                 >
                   {createOrderMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                       Processando...
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="mr-2 h-4 w-4" />
+                      <ShoppingBag className="mr-3 h-5 w-5" />
                       Finalizar Pedido
                     </>
                   )}
                 </Button>
 
                 <div className="text-center">
-                  <Button variant="link" asChild>
+                  <Button variant="link" asChild className="text-base">
                     <Link href="/cart">Voltar ao Carrinho</Link>
                   </Button>
                 </div>
