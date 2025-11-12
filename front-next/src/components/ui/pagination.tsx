@@ -60,7 +60,7 @@ export function Pagination({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
-      <div className="text-sm text-muted-foreground">
+      <div className="text-base text-muted-foreground">
         Exibindo {startItem}-{endItem} de {totalItems} produtos
       </div>
 
