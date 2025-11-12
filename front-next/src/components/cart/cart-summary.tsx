@@ -24,42 +24,42 @@ export function CartSummary({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Resumo do Pedido</CardTitle>
+      <Card className="sticky top-24">
+        <CardHeader className="py-6 px-6">
+          <CardTitle className="text-2xl font-bold font-display">Resumo do Pedido</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
+        <CardContent className="space-y-6 px-6">
+          <div className="flex justify-between text-base">
+            <span className="text-muted-foreground">Subtotal</span>
             <span className="font-semibold">{formatCurrency(subtotal)}</span>
           </div>
           {shippingCost !== undefined ? (
-            <div className="flex justify-between">
-              <span>Frete</span>
+            <div className="flex justify-between text-base">
+              <span className="text-muted-foreground">Frete</span>
               <span className="font-semibold">
                 {shippingCost === 0 ? 'Grátis' : formatCurrency(shippingCost)}
               </span>
             </div>
           ) : (
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="flex justify-between text-base text-muted-foreground">
               <span>Frete</span>
               <span>Calculado no checkout</span>
             </div>
           )}
-          <div className="border-t pt-4">
-            <div className="flex justify-between text-lg font-bold">
+          <div className="border-t border-border pt-6">
+            <div className="flex justify-between text-2xl font-bold font-display">
               <span>Total</span>
-              <span>{formatCurrency(total)}</span>
+              <span className="text-primary">{formatCurrency(total)}</span>
             </div>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="px-6 pb-6">
           {onCheckout ? (
-            <Button className="w-full" size="lg" onClick={onCheckout}>
+            <Button className="w-full h-12 text-base" size="lg" onClick={onCheckout}>
               {checkoutLabel}
             </Button>
           ) : (
-            <Button className="w-full" size="lg" asChild>
+            <Button className="w-full h-12 text-base" size="lg" asChild>
               <Link href="/checkout">{checkoutLabel}</Link>
             </Button>
           )}
@@ -67,8 +67,8 @@ export function CartSummary({
       </Card>
 
       {showContinueShopping && (
-        <div className="mt-4 text-center">
-          <Button variant="link" asChild>
+        <div className="mt-6 text-center">
+          <Button variant="link" asChild className="text-base">
             <Link href="/">Continuar Comprando</Link>
           </Button>
         </div>

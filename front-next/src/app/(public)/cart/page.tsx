@@ -15,52 +15,58 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Seu carrinho está vazio</h1>
-          <p className="text-muted-foreground mb-6">
-            Adicione produtos para continuar comprando
-          </p>
-          <Button asChild>
-            <Link href="/">Ver Produtos</Link>
-          </Button>
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16">
+          <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm max-w-2xl mx-auto">
+            <ShoppingBag className="h-24 w-24 mx-auto text-muted-foreground mb-6" />
+            <h1 className="text-4xl font-bold font-display mb-4">Seu carrinho está vazio</h1>
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              Adicione produtos para continuar comprando
+            </p>
+            <Button asChild size="lg" className="h-12 text-base">
+              <Link href="/">Ver Produtos</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Carrinho de Compras</h1>
+    <div className="bg-background-light dark:bg-background min-h-screen">
+      <div className="container mx-auto px-6 md:px-8 py-12">
+        <h1 className="text-4xl md:text-5xl font-bold font-display mb-8">Carrinho de Compras</h1>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Produtos ({items.length})</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y">
-              {items.map((item) => (
-                <CartItem
-                  key={item.product.id}
-                  product={item.product}
-                  quantity={item.quantity}
-                  onUpdateQuantity={(qty) => updateQuantity(item.product.id, qty)}
-                  onRemove={() => removeItem(item.product.id)}
-                />
-              ))}
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={clearCart}>
-                Limpar Carrinho
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader className="py-6 px-6">
+                <CardTitle className="text-2xl font-bold font-display">
+                  Produtos ({items.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                {items.map((item) => (
+                  <CartItem
+                    key={item.product.id}
+                    product={item.product}
+                    quantity={item.quantity}
+                    onUpdateQuantity={(qty) => updateQuantity(item.product.id, qty)}
+                    onRemove={() => removeItem(item.product.id)}
+                  />
+                ))}
+              </CardContent>
+              <CardFooter className="px-6 pb-6">
+                <Button variant="outline" onClick={clearCart} className="h-11">
+                  Limpar Carrinho
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
 
-        <div>
-          <CartSummary subtotal={total} />
+          <div>
+            <CartSummary subtotal={total} />
+          </div>
         </div>
       </div>
     </div>
