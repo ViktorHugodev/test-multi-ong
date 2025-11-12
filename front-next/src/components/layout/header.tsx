@@ -19,62 +19,46 @@ export function Header() {
   const cartCount = getItemCount();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-6 md:px-8">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 transition-colors hover:opacity-80"
-        >
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-xl">
-              storefront
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container mx-auto flex h-20 items-center justify-between px-6 md:px-8">
+        <div className="flex items-center gap-8 md:gap-12">
+          <Link
+            href="/"
+            className="flex items-center gap-3 transition-colors hover:text-primary"
+          >
+            <Package className="h-7 w-7 text-primary" />
+            <span className="font-bold text-xl md:text-2xl font-display">
+              Marketplace ONG
             </span>
-          </div>
-          <span className="font-bold text-lg md:text-xl">
-            Multi-ONG Marketplace
-          </span>
-        </Link>
-
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/products"
-            className="text-sm font-medium text-gray-700 transition-colors hover:text-primary"
-          >
-            Produtos
           </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium text-gray-700 transition-colors hover:text-primary"
-          >
-            Sobre
-          </Link>
-          <Link
-            href="/ngos"
-            className="text-sm font-medium text-gray-700 transition-colors hover:text-primary"
-          >
-            ONGs Parceiras
-          </Link>
-        </nav>
-
-        {/* Actions */}
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Search className="h-5 w-5 text-gray-700" />
-          </button>
-          
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <Heart className="h-5 w-5 text-gray-700" />
-          </button>
-
-          <Link href="/cart" className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ShoppingCart className="h-5 w-5 text-gray-700" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-primary text-white text-xs font-semibold rounded-full">
-                {cartCount}
-              </span>
+          <nav className="hidden md:flex gap-8">
+            <Link
+              href="/"
+              className="text-base font-medium transition-colors hover:text-primary"
+            >
+              Produtos
+            </Link>
+            {isAuthenticated && (
+              <Link
+                href="/my-orders"
+                className="text-base font-medium transition-colors hover:text-primary"
+              >
+                Meus Pedidos
+              </Link>
             )}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <Link href="/cart" className="relative">
+            <Button variant="ghost" size="icon" className="hover:bg-accent">
+              <ShoppingCart className="h-6 w-6" />
+              {cartCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 text-xs rounded-full">
+                  {cartCount}
+                </Badge>
+              )}
+            </Button>
           </Link>
 
           {isAuthenticated ? (

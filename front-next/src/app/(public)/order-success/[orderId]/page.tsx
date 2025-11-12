@@ -201,6 +201,7 @@ export default function OrderSuccessPage() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
