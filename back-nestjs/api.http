@@ -1,7 +1,8 @@
 ### Multi-ONG Marketplace API Tests
 ### Base URL
 @baseUrl = http://localhost:3333/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzE1MDYwNSwiZXhwIjoxNzYzNzU1NDA1fQ.WJQDOS576jzZzOrnEJNPC_c-tABOfAagn95Fvz4gqqw
+@accessToken = your_access_token_here
+@refreshToken = your_refresh_token_here
 
 ### ============================================
 ### AUTHENTICATION
@@ -46,7 +47,41 @@ Content-Type: application/json
 
 ### Get Current User Profile
 GET {{baseUrl}}/auth/me
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
+
+### Refresh Access Token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### USERS
+### ============================================
+
+### Get Current User
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+
+### Update Current User (Change Role/Organization)
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "role": "ong_staff",
+  "organizationId": "org-uuid-here"
+}
+
+### Get Available Roles
+GET {{baseUrl}}/users/roles
+Authorization: Bearer {{accessToken}}
 
 ### ============================================
 ### ORGANIZATIONS (PUBLIC)
@@ -67,7 +102,7 @@ GET {{baseUrl}}/organizations/slug/ong-exemplo
 
 ### Create Organization
 POST {{baseUrl}}/organizations
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -81,7 +116,7 @@ Content-Type: application/json
 
 ### Update Organization
 PATCH {{baseUrl}}/organizations/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -92,7 +127,7 @@ Content-Type: application/json
 
 ### Delete Organization
 DELETE {{baseUrl}}/organizations/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### ============================================
 ### PRODUCTS (PRIVATE - ONG Management)
@@ -100,7 +135,7 @@ Authorization: Bearer {{token}}
 
 ### Create Product
 POST {{baseUrl}}/products
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -116,23 +151,23 @@ Content-Type: application/json
 
 ### List Products (Organization)
 GET {{baseUrl}}/products
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### List Products with Filters
 GET {{baseUrl}}/products?category=alimentos&page=1&limit=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### List Products with Search
 GET {{baseUrl}}/products?search=teste&minPrice=10&maxPrice=50
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### Get Product by ID
 GET {{baseUrl}}/products/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### Update Product
 PATCH {{baseUrl}}/products/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -144,7 +179,7 @@ Content-Type: application/json
 
 ### Delete Product
 DELETE {{baseUrl}}/products/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### ============================================
 ### PRODUCTS (PUBLIC - Marketplace)
@@ -174,7 +209,7 @@ GET {{baseUrl}}/public/products/uuid-here
 
 ### Create Order
 POST {{baseUrl}}/orders
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -202,7 +237,7 @@ Content-Type: application/json
 
 ### Create Order (Minimal)
 POST {{baseUrl}}/orders
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -217,15 +252,15 @@ Content-Type: application/json
 
 ### List My Orders
 GET {{baseUrl}}/orders
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### List My Orders with Pagination
 GET {{baseUrl}}/orders?page=1&pageSize=10
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### Get Order by ID
 GET {{baseUrl}}/orders/uuid-here
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### ============================================
 ### ORDERS (ORGANIZATION)
@@ -233,11 +268,11 @@ Authorization: Bearer {{token}}
 
 ### List Organization Orders
 GET {{baseUrl}}/organizations/uuid-org-here/orders
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### List Organization Orders with Pagination
 GET {{baseUrl}}/organizations/uuid-org-here/orders?page=1&pageSize=20
-Authorization: Bearer {{token}}
+Authorization: Bearer {{accessToken}}
 
 ### ============================================
 ### SEARCH
