@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/use-auth';
 import { useCart } from '@/lib/hooks/use-cart';
@@ -17,8 +18,15 @@ import {
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth();
-  const { getItemCount } = useCart();
-  const cartCount = getItemCount();
+  const cartItems = useCart((state) => state.items);
+  const [mounted, setMounted] = useState(false);
+
+  // Evita erro de hidratação ao carregar o valor do localStorage apenas no cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -55,7 +63,7 @@ export function Header() {
           <Link href="/cart" className="relative">
             <Button variant="ghost" size="icon" className="hover:bg-accent">
               <ShoppingCart className="h-6 w-6" />
-              {cartCount > 0 && (
+              {mounted && cartCount > 0 && (
                 <Badge className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 text-xs rounded-full">
                   {cartCount}
                 </Badge>
@@ -63,7 +71,13 @@ export function Header() {
             </Button>
           </Link>
 
-          {isAuthenticated ? (
+          {!mounted ? (
+            // Placeholder durante SSR para evitar erro de hidratação
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-8" />
+              <div className="w-20 h-8" />
+            </div>
+          ) : isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
