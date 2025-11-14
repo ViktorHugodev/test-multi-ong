@@ -28,8 +28,12 @@ export const checkoutSchema = z.object({
 
   phone: z
     .string()
-    .regex(/^\(\d{2}\)\s?\d{4,5}-?\d{4}$/, 'Telefone inválido (ex: (11) 98765-4321)')
-    .transform((val) => val.replace(/\D/g, '')),
+    .min(10, 'Telefone deve ter ao menos 10 dígitos')
+    .regex(/^[\d\s\(\)\-]+$/, 'Telefone inválido (use apenas números, parênteses, espaços e traço)')
+    .transform((val) => val.replace(/\D/g, ''))
+    .refine((val) => val.length === 10 || val.length === 11, {
+      message: 'Telefone deve ter 10 ou 11 dígitos',
+    }),
 
   paymentMethod: z
     .enum(['pix', 'credit_card', 'debit_card', 'boleto'], {

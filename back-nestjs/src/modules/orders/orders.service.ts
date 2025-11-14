@@ -5,6 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { OrdersRepository } from './orders.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectQueue } from '@nestjs/bull';
@@ -42,10 +43,10 @@ export class OrdersService {
           .map((item) => item.productId)
           .sort();
 
-        // Lock rows com FOR UPDATE
+        // Lock rows com FOR UPDATE - Cast explícito para UUID
         await tx.$executeRaw`
           SELECT * FROM products
-          WHERE id = ANY(${productIds}::uuid[])
+          WHERE id = ANY(ARRAY[${Prisma.join(productIds.map(id => Prisma.sql`${id}::uuid`))}])
           FOR UPDATE
         `;
 
