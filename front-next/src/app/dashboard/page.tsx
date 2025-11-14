@@ -2,10 +2,8 @@
 
 import { useState } from 'react';
 import { useProducts } from '@/lib/hooks/use-products';
-import { useDashboardStats } from '@/lib/hooks/use-dashboard-stats';
 import { DashboardLoadingState } from './components/loading-state';
 import { ErrorState } from './components/error-state';
-import { DashboardStats } from './components/dashboard-stats';
 import { ProductList } from './components/product-list';
 import { AddProductDialog } from './components/add-product-dialog';
 
@@ -20,14 +18,8 @@ export default function DashboardPage() {
     refetch: refetchProducts,
   } = useProducts(filters);
 
-  const {
-    data: statsData,
-    isLoading: isLoadingStats,
-    error: statsError,
-  } = useDashboardStats();
-
   // Estados de Loading
-  if (isLoadingProducts || isLoadingStats) {
+  if (isLoadingProducts) {
     return <DashboardLoadingState />;
   }
 
@@ -46,16 +38,6 @@ export default function DashboardPage() {
 
   // Dados carregados
   const products = productsData?.items || [];
-  const stats = statsData || {
-    totalRevenue: 0,
-    totalOrders: 0,
-    newCustomers: 0,
-    productsSold: 0,
-    revenueChange: 0,
-    ordersChange: 0,
-    customersChange: 0,
-    productsSoldChange: 0,
-  };
 
   return (
     <div className="p-8">
@@ -76,9 +58,6 @@ export default function DashboardPage() {
           <AddProductDialog />
         </div>
       </div>
-
-      {/* Estatísticas */}
-      {!statsError && <DashboardStats stats={stats} />}
 
       {/* Lista de Produtos */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
