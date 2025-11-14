@@ -12,10 +12,7 @@ export const createProductSchema = z.object({
     .max(1000, 'Descrição deve ter no máximo 1000 caracteres')
     .optional(),
   price: z
-    .number({
-      required_error: 'Preço é obrigatório',
-      invalid_type_error: 'Preço deve ser um número',
-    })
+    .number({ message: 'Preço deve ser um número' })
     .positive('Preço deve ser maior que zero')
     .max(999999, 'Preço muito alto'),
   category: z
@@ -28,18 +25,12 @@ export const createProductSchema = z.object({
     .optional()
     .or(z.literal('')),
   stockQty: z
-    .number({
-      required_error: 'Quantidade em estoque é obrigatória',
-      invalid_type_error: 'Quantidade deve ser um número',
-    })
+    .number({ message: 'Quantidade deve ser um número' })
     .int('Quantidade deve ser um número inteiro')
     .min(0, 'Estoque não pode ser negativo')
     .max(999999, 'Quantidade em estoque muito alta'),
   weightGrams: z
-    .number({
-      required_error: 'Peso é obrigatório',
-      invalid_type_error: 'Peso deve ser um número',
-    })
+    .number({ message: 'Peso deve ser um número' })
     .positive('Peso deve ser maior que zero')
     .max(999999, 'Peso muito alto'),
   sku: z
