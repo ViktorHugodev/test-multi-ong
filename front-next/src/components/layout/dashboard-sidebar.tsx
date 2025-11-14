@@ -9,26 +9,33 @@ const menuItems = [
     icon: LayoutDashboard,
     label: 'Dashboard',
     href: '/dashboard',
+    disabled: false,
   },
   {
     icon: Package,
     label: 'Products',
-    href: '/dashboard/products',
+    href: '/products',
+    disabled: false,
   },
   {
     icon: ShoppingCart,
     label: 'Orders',
-    href: '/dashboard/orders',
+    href: '/my-orders',
+    disabled: false,
   },
   {
     icon: BarChart3,
     label: 'Analytics',
     href: '/dashboard/analytics',
+    disabled: true,
+    badge: 'Em breve',
   },
   {
     icon: Settings,
     label: 'Settings',
     href: '/dashboard/settings',
+    disabled: true,
+    badge: 'Em breve',
   },
 ];
 
@@ -56,19 +63,27 @@ export function DashboardSidebar() {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-            
+
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.disabled ? '#' : item.href}
+                onClick={(e) => item.disabled && e.preventDefault()}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
+                  item.disabled
+                    ? 'text-gray-400 cursor-not-allowed opacity-60'
+                    : isActive
                     ? 'bg-primary/10 text-primary font-medium'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <Icon className="h-5 w-5" />
                 <span className="text-sm">{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto text-xs text-gray-400 font-medium">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}

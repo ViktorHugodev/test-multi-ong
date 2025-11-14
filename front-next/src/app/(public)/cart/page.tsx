@@ -1,17 +1,34 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useCart } from '@/lib/hooks/use-cart';
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal, clearCart } = useCart();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const total = getTotal();
+
+  // Mostrar loading durante SSR/hidratação
+  if (!mounted) {
+    return (
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16 text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

@@ -9,7 +9,19 @@ import { ProductGrid } from '@/components/products/product-grid';
 import { ProductFilters } from '@/components/products/product-filters';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ProductFilters as IProductFilters } from '@/types/product.types';
+import { ProductFilters as IProductFilters, PaginatedResponse, Product } from '@/types/product.types';
+
+// Helper function to check if data has valid structure
+const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
+  return Boolean(
+    data &&
+    typeof data === 'object' &&
+    Array.isArray(data.items) &&
+    data.items.length > 0 &&
+    data.meta &&
+    typeof data.meta === 'object'
+  );
+};
 
 const HomePage = () => {
   const [filters, setFilters] = useState<IProductFilters>({
@@ -109,7 +121,7 @@ const HomePage = () => {
                     Erro ao carregar produtos. Tente novamente mais tarde.
                   </p>
                 </div>
-              ) : data && data.items.length > 0 ? (
+              ) : hasValidProducts(data) ? (
                 <>
                   <ProductGrid products={data.items} />
                   <div className="pt-8">

@@ -1,7 +1,7 @@
 ### Multi-ONG Marketplace API Tests
 ### Base URL
 @baseUrl = http://localhost:3333/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNmRlMjk1Zi04MTk4LTQ0ODAtYmNhZC1kOWVlOTliYWJhZTkiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoiY3VzdG9tZXIiLCJvcmdhbml6YXRpb25JZCI6bnVsbCwiaWF0IjoxNzYyODgxMTM3LCJleHAiOjE3NjM0ODU5Mzd9.vbt3YOIABzp7gnkT_O5eOdYYTShgXSraelB1GadHCuo
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzE1MDYwNSwiZXhwIjoxNzYzNzU1NDA1fQ.WJQDOS576jzZzOrnEJNPC_c-tABOfAagn95Fvz4gqqw
 
 ### ============================================
 ### AUTHENTICATION
