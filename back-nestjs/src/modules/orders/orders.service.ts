@@ -5,7 +5,6 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { OrdersRepository } from './orders.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectQueue } from '@nestjs/bull';
@@ -38,19 +37,21 @@ export class OrdersService {
 
     return this.prisma.$transaction(
       async (tx) => {
-        // 1. LOCK PRODUCTS (PESSIMISTIC) - Ordenar IDs para prevenir deadlocks
+        // 1. ORDENAR IDs para prevenir deadlocks
         const productIds = dto.items
           .map((item) => item.productId)
           .sort();
 
-        // Lock rows com FOR UPDATE - Cast explícito para UUID
-        await tx.$executeRaw`
-          SELECT * FROM products
-          WHERE id = ANY(ARRAY[${Prisma.join(productIds.map(id => Prisma.sql`${id}::uuid`))}])
-          FOR UPDATE
-        `;
+        // 2. LOCK PESSIMISTA usando queryRawUnsafe com placeholders posicionais
+        // Isso resolve o problema de type casting UUID
+        const placeholders = productIds.map((_, index) => `$${index + 1}`).join(',');
 
-        // 2. Buscar produtos
+        await tx.$queryRawUnsafe(
+          `SELECT id FROM products WHERE id IN (${placeholders}) FOR UPDATE`,
+          ...productIds
+        );
+
+        // 3. Buscar produtos (agora já estão locked)
         const products = await tx.product.findMany({
           where: {
             id: { in: productIds },
@@ -59,7 +60,7 @@ export class OrdersService {
           },
         });
 
-        // 3. VALIDATE STOCK
+        // 4. VALIDATE STOCK
         const stockErrors: string[] = [];
 
         for (const item of dto.items) {
@@ -84,18 +85,21 @@ export class OrdersService {
           );
         }
 
-        // 4. CALCULATE TOTAL
+        // 5. CALCULATE TOTAL
         const totalAmount = dto.items.reduce((sum, item) => {
           const product = products.find((p) => p.id === item.productId);
           if (!product) return sum;
           return sum + Number(product.price) * item.quantity;
         }, 0);
 
-        // 5. CREATE ORDER
+        // 6. GENERATE ORDER NUMBER
+        const orderNumber = await this.generateOrderNumber(tx);
+
+        // 7. CREATE ORDER
         const order = await tx.order.create({
           data: {
             customerId: userId,
-            orderNumber: this.generateOrderNumber(),
+            orderNumber,
             status: 'payment_processing',
             totalAmount,
             shippingDetails: dto.shippingDetails,
@@ -104,7 +108,7 @@ export class OrdersService {
           },
         });
 
-        // 6. CREATE ORDER ITEMS + ATOMIC STOCK DECREMENT
+        // 8. CREATE ORDER ITEMS + ATOMIC STOCK DECREMENT
         for (const item of dto.items) {
           const product = products.find((p) => p.id === item.productId);
           if (!product) continue;
@@ -208,11 +212,24 @@ export class OrdersService {
     });
   }
 
-  private generateOrderNumber(): string {
-    const year = new Date().getFullYear();
-    const random = Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, '0');
-    return `ORD-${year}-${random}`;
+  private async generateOrderNumber(tx?: any): Promise<string> {
+    const prismaClient = tx || this.prisma;
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    // Contar pedidos criados hoje para gerar sequência
+    const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+    const count = await prismaClient.order.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+        },
+      },
+    });
+
+    const sequence = String(count + 1).padStart(4, '0');
+    return `ORD-${year}${month}${day}-${sequence}`;
   }
 }
