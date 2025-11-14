@@ -48,14 +48,16 @@ const ProductDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Skeleton className="aspect-square w-full" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <Skeleton className="aspect-square w-full rounded-lg" />
+            <div className="space-y-6">
+              <Skeleton className="h-12 w-3/4 rounded-lg" />
+              <Skeleton className="h-8 w-1/2 rounded-lg" />
+              <Skeleton className="h-32 w-full rounded-lg" />
+              <Skeleton className="h-14 w-full rounded-lg" />
+            </div>
           </div>
         </div>
       </div>
@@ -64,14 +66,16 @@ const ProductDetailPage = () => {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <p className="text-destructive text-lg mb-4">
-            Produto não encontrado ou erro ao carregar.
-          </p>
-          <Button asChild>
-            <Link href="/">Voltar para o Marketplace</Link>
-          </Button>
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-12">
+          <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm">
+            <p className="text-destructive text-2xl font-semibold mb-6">
+              Produto não encontrado ou erro ao carregar.
+            </p>
+            <Button asChild size="lg">
+              <Link href="/">Voltar para o Marketplace</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -80,166 +84,160 @@ const ProductDetailPage = () => {
   const isOutOfStock = product.stockQty === 0;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-        <Link href="/" className="hover:text-foreground flex items-center gap-1">
-          <Home className="h-4 w-4" />
-          Início
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link href="/" className="hover:text-foreground">
-          Produtos
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-foreground">{product.name}</span>
-      </nav>
+    <div className="bg-background-light min-h-screen">
+      <div className="container mx-auto px-6 md:px-8 py-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+          <Link href="/" className="hover:text-primary">Home</Link>
+          <span>/</span>
+          <Link href="/products" className="hover:text-primary">Home Goods</Link>
+          <span>/</span>
+          <span className="text-gray-900">{product.name}</span>
+        </nav>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="aspect-square relative bg-muted rounded-lg overflow-hidden">
-          {product.imageUrl ? (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <Package className="h-32 w-32 text-muted-foreground" />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <Badge variant="secondary" className="mb-3">
-              {product.category}
-            </Badge>
-            <h1 className="text-4xl font-bold mb-2">{product.name}</h1>
-            {product.organization && (
-              <p className="text-lg text-muted-foreground">
-                por{' '}
-                <span className="font-semibold text-foreground">
-                  {product.organization.name}
-                </span>
-              </p>
-            )}
-          </div>
-
-          {product.description && (
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Descrição</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {product.description}
-              </p>
-            </div>
-          )}
-
-          <Separator />
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Product Images */}
           <div className="space-y-4">
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-primary">
-                {formatCurrency(product.price)}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground">Estoque:</span>
-                <p className="font-semibold">
-                  {isOutOfStock ? (
-                    <Badge variant="destructive">Esgotado</Badge>
-                  ) : (
-                    `${product.stockQty} unidades`
-                  )}
-                </p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Peso:</span>
-                <p className="font-semibold">{product.weightGrams}g</p>
-              </div>
-              {product.sku && (
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">SKU:</span>
-                  <p className="font-semibold">{product.sku}</p>
+            <div className="aspect-square relative bg-gray-200 rounded-xl overflow-hidden">
+              {product.imageUrl ? (
+                <Image
+                  src={product.imageUrl}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  priority
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <Package className="h-32 w-32 text-gray-400" />
                 </div>
               )}
             </div>
+            
+            {/* Thumbnail Gallery */}
+            <div className="grid grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="aspect-square relative bg-gray-200 rounded-lg overflow-hidden border-2 border-transparent hover:border-primary cursor-pointer transition-colors">
+                  {product.imageUrl && i === 1 ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={`${product.name} ${i}`}
+                      fill
+                      className="object-cover"
+                      sizes="100px"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Package className="h-8 w-8 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <Separator />
-
-          <div className="space-y-4">
+          {/* Product Info */}
+          <div className="space-y-6">
             <div>
-              <label className="text-sm font-medium mb-2 block">
-                Quantidade
-              </label>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
+              <h1 className="text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+              <div className="flex items-center gap-2 mb-4">
+                {[1, 2, 3, 4].map((star) => (
+                  <span key={star} className="material-symbols-outlined text-yellow-400 text-xl">
+                    star
+                  </span>
+                ))}
+                <span className="material-symbols-outlined text-yellow-400 text-xl">
+                  star_half
+                </span>
+                <span className="text-sm text-gray-600 ml-2">(120 reviews)</span>
+              </div>
+              {product.description && (
+                <p className="text-gray-700 leading-relaxed">
+                  {product.description}
+                </p>
+              )}
+            </div>
+
+            <div className="text-4xl font-bold text-gray-900">
+              {formatCurrency(product.price)}
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-gray-900">Quantity</label>
+              <div className="flex items-center gap-3">
+                <button
                   onClick={() => handleQuantityChange(-1)}
                   disabled={quantity <= 1 || isOutOfStock}
+                  className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Minus className="h-4 w-4" />
-                </Button>
-                <div className="w-16 text-center font-semibold text-lg">
-                  {quantity}
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
+                </button>
+                <input
+                  type="text"
+                  value={quantity}
+                  readOnly
+                  className="w-16 h-10 text-center border border-gray-300 rounded-lg font-medium"
+                />
+                <button
                   onClick={() => handleQuantityChange(1)}
                   disabled={quantity >= product.stockQty || isOutOfStock}
+                  className="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Plus className="h-4 w-4" />
-                </Button>
+                </button>
               </div>
             </div>
 
-            <Button
+            {/* Add to Cart Button */}
+            <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              size="lg"
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-4 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              {isOutOfStock ? 'Produto Esgotado' : 'Adicionar ao Carrinho'}
-            </Button>
-          </div>
+              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+            </button>
 
-          {product.organization && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Sobre a ONG</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4">
-                  {product.organization.logoUrl && (
-                    <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted">
-                      <Image
-                        src={product.organization.logoUrl}
-                        alt={product.organization.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
+            {/* NGO Info */}
+            {product.organization && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                    <span className="material-symbols-outlined text-gray-600">
+                      volunteer_activism
+                    </span>
+                  </div>
                   <div>
-                    <p className="font-semibold text-lg">
+                    <p className="text-sm text-gray-600">Sold by</p>
+                    <p className="font-semibold text-lg text-gray-900">
                       {product.organization.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      @{product.organization.slug}
                     </p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <p className="text-sm text-gray-700 mb-4">
+                  We empower global artisans by providing a platform to share their craft and earn a sustainable income, preserving cultural heritage for future generations.
+                </p>
+                <Link
+                  href={`/ngos/${product.organization.slug}`}
+                  className="text-primary font-medium text-sm hover:underline"
+                >
+                  Visit NGO Storefront
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* You might also like */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">You might also like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Placeholder for related products */}
+            <div className="text-center text-gray-500 col-span-full py-8">
+              Related products will appear here
+            </div>
+          </div>
         </div>
       </div>
     </div>

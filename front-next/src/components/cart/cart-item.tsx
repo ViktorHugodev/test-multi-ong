@@ -18,41 +18,40 @@ export function CartItem({ product, quantity, onUpdateQuantity, onRemove }: Cart
   const subtotal = Number(product.price) * quantity;
 
   return (
-    <div className="flex gap-4 py-4 border-b">
-      <div className="w-24 h-24 bg-muted rounded flex-shrink-0 relative">
+    <div className="flex gap-6 py-6 border-b border-border last:border-0">
+      <div className="w-28 h-28 bg-muted rounded-lg flex-shrink-0 relative overflow-hidden">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            className="object-cover rounded"
-            sizes="96px"
+            className="object-cover"
+            sizes="112px"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
             Sem imagem
           </div>
         )}
       </div>
 
-      <div className="flex-1">
-        <h3 className="font-semibold">{product.name}</h3>
+      <div className="flex-1 space-y-2">
+        <h3 className="font-bold text-lg font-display">{product.name}</h3>
         {product.organization && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             Por {product.organization.name}
           </p>
         )}
-        <p className="text-sm font-semibold mt-1">
+        <p className="text-base font-semibold text-primary">
           {formatCurrency(product.price)}
         </p>
       </div>
 
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-col items-end gap-4 min-w-fit">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => onUpdateQuantity(Math.max(1, quantity - 1))}
           >
             <Minus className="h-4 w-4" />
@@ -61,27 +60,26 @@ export function CartItem({ product, quantity, onUpdateQuantity, onRemove }: Cart
             type="number"
             value={quantity}
             onChange={(e) => onUpdateQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-16 text-center"
+            className="w-16 text-center h-9"
             min="1"
             max={product.stockQty}
           />
           <Button
             variant="outline"
-            size="icon"
-            className="h-8 w-8"
+            size="icon-sm"
             onClick={() => onUpdateQuantity(Math.min(product.stockQty, quantity + 1))}
           >
             <Plus className="h-4 w-4" />
           </Button>
         </div>
-        <p className="font-semibold">{formatCurrency(subtotal)}</p>
+        <p className="font-bold text-xl font-display text-primary">{formatCurrency(subtotal)}</p>
         <Button
           variant="ghost"
           size="sm"
           onClick={onRemove}
-          className="text-destructive hover:text-destructive"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
         >
-          <Trash2 className="h-4 w-4 mr-1" />
+          <Trash2 className="h-4 w-4 mr-2" />
           Remover
         </Button>
       </div>
