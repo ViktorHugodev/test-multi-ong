@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings, User } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings, User, Building2 } from 'lucide-react';
 
 const menuItems = [
   {
@@ -14,13 +14,19 @@ const menuItems = [
   {
     icon: Package,
     label: 'Products',
-    href: '/products',
+    href: '/dashboard/products',
     disabled: false,
   },
   {
     icon: ShoppingCart,
     label: 'Orders',
-    href: '/my-orders',
+    href: '/dashboard/orders',
+    disabled: false,
+  },
+  {
+    icon: Building2,
+    label: 'Organizations',
+    href: '/dashboard/organizations',
     disabled: false,
   },
   {
@@ -92,7 +98,7 @@ export function DashboardSidebar() {
         {/* Profile */}
         <div className="mt-auto pt-6 border-t border-gray-200">
           <Link
-            href="/profile"
+            href="/dashboard/profile"
             className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">

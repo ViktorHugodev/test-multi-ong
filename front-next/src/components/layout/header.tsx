@@ -43,14 +43,14 @@ export function Header() {
           </Link>
           <nav className="hidden md:flex gap-8">
             <Link
-              href="/"
+              href="/products"
               className="text-base font-medium transition-colors hover:text-primary"
             >
               Produtos
             </Link>
             {isAuthenticated && (
               <Link
-                href="/my-orders"
+                href="/dashboard/orders"
                 className="text-base font-medium transition-colors hover:text-primary"
               >
                 Meus Pedidos
@@ -105,7 +105,12 @@ export function Header() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/my-orders" className="cursor-pointer">
+                  <Link href="/dashboard/profile" className="cursor-pointer">
+                    Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/orders" className="cursor-pointer">
                     Meus Pedidos
                   </Link>
                 </DropdownMenuItem>

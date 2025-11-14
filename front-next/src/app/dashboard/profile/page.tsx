@@ -135,70 +135,88 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Role Select */}
-              <FormField
-                control={form.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Função (Role)</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma função" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {roles?.map((role: string) => (
-                          <SelectItem key={role} value={role}>
-                            {role}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Sua função determina suas permissões no sistema.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Função Atual</p>
+                <p className="text-sm text-muted-foreground">
+                  {currentUser?.role || 'Não definido'}
+                </p>
+              </div>
 
-              {/* Organization Select */}
-              <FormField
-                control={form.control}
-                name="organizationId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organização</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma organização" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {organizations?.map((org: any) => (
-                          <SelectItem key={org.id} value={org.id}>
-                            {org.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      A organização à qual você pertence. Trocar de organização
-                      recarregará a aplicação.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Organização Atual</p>
+                <p className="text-sm text-muted-foreground">
+                  {currentUser?.organization?.name || 'Nenhuma organização'}
+                </p>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-medium mb-4">Alterar Informações</h3>
+
+                {/* Role Select */}
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      <FormLabel>Nova Função (Role)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma função" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roles?.map((role: string) => (
+                            <SelectItem key={role} value={role}>
+                              {role}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Sua função determina suas permissões no sistema.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Organization Select */}
+                <FormField
+                  control={form.control}
+                  name="organizationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nova Organização</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma organização" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {organizations?.map((org: any) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        A organização à qual você pertence. Trocar de organização
+                        recarregará a aplicação.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <Button
                 type="submit"
