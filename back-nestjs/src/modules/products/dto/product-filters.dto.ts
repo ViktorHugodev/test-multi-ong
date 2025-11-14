@@ -1,5 +1,10 @@
-import { IsOptional, IsString, IsNumber, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsInt, Min, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export enum SortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export class ProductFiltersDto {
   @IsOptional()
@@ -37,4 +42,20 @@ export class ProductFiltersDto {
   @IsInt()
   @Min(1)
   limit?: number = 20;
+
+  // Aceitar pageSize como alternativa a limit (para compatibilidade com frontend)
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  pageSize?: number;
+
+  // Ordenação
+  @IsOptional()
+  @IsString()
+  sortBy?: string = 'createdAt';
+
+  @IsOptional()
+  @IsEnum(SortOrder)
+  sortOrder?: SortOrder = SortOrder.DESC;
 }
