@@ -49,15 +49,22 @@ export class ProductsRepository extends BaseRepository<Product> {
     }
 
     const page = filters?.page || 1;
-    const limit = filters?.limit || 20;
+    const limit = filters?.pageSize || filters?.limit || 20;
     const skip = (page - 1) * limit;
+
+    // Ordenação dinâmica
+    const sortBy = filters?.sortBy || 'createdAt';
+    const sortOrder = filters?.sortOrder || 'desc';
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {
+      [sortBy]: sortOrder,
+    };
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: { organization: true },
       }),
       this.prisma.product.count({ where }),
@@ -104,15 +111,22 @@ export class ProductsRepository extends BaseRepository<Product> {
     }
 
     const page = filters?.page || 1;
-    const limit = filters?.limit || 20;
+    const limit = filters?.pageSize || filters?.limit || 20;
     const skip = (page - 1) * limit;
+
+    // Ordenação dinâmica
+    const sortBy = filters?.sortBy || 'createdAt';
+    const sortOrder = filters?.sortOrder || 'desc';
+    const orderBy: Prisma.ProductOrderByWithRelationInput = {
+      [sortBy]: sortOrder,
+    };
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: { organization: true },
       }),
       this.prisma.product.count({ where }),
