@@ -5,10 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { productsApi } from '@/lib/api/products';
 import { ProductGrid } from '@/components/products/product-grid';
-import { ProductFilters } from '@/components/products/product-filters';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ProductFilters as IProductFilters, PaginatedResponse, Product } from '@/types/product.types';
+import { PaginatedResponse, Product } from '@/types/product.types';
 
 // Helper function to check if data has valid structure
 const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
@@ -23,24 +22,16 @@ const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
 };
 
 const ProductsPage = () => {
-  const [filters, setFilters] = useState<IProductFilters>({
-    page: 1,
-    pageSize: 20,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
-  });
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', filters],
-    queryFn: () => productsApi.getPublicProducts(filters),
+    queryKey: ['products', page],
+    queryFn: () => productsApi.getPublicProducts({ page, pageSize }),
   });
 
-  const handleFiltersChange = (newFilters: IProductFilters) => {
-    setFilters({ ...newFilters, page: 1 });
-  };
-
-  const handlePageChange = (page: number) => {
-    setFilters({ ...filters, page });
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -57,15 +48,8 @@ const ProductsPage = () => {
           </p>
         </div>
 
-        {/* Main Content with Filters and Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <aside className="lg:col-span-1">
-            <ProductFilters filters={filters} onFiltersChange={handleFiltersChange} />
-          </aside>
-
-          {/* Products Grid */}
-          <main className="lg:col-span-3 space-y-8">
+        {/* Main Content - Products */}
+        <div className="space-y-8">
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 9 }).map((_, i) => (
@@ -123,7 +107,6 @@ const ProductsPage = () => {
                 </div>
               </div>
             )}
-          </main>
         </div>
       </div>
     </div>
