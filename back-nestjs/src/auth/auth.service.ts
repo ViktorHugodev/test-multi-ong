@@ -147,6 +147,25 @@ export class AuthService {
     });
   }
 
+  async validateUserCredentials(email: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { organization: true },
+    });
+
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    return user;
+  }
+
   async refreshToken(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken, {

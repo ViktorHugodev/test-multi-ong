@@ -25,6 +25,32 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  // Endpoint específico para NextAuth v5
+  @Public()
+  @Post('nextauth/validate')
+  async validateForNextAuth(@Body() loginDto: LoginDto) {
+    const user = await this.authService.validateUserCredentials(
+      loginDto.email,
+      loginDto.password,
+    );
+
+    if (!user) {
+      // NextAuth espera null em caso de falha
+      return null;
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.fullName,
+        role: user.role,
+        organizationId: user.organizationId,
+        isActive: user.isActive,
+      },
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@CurrentUser('id') userId: string) {
