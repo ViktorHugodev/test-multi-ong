@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +25,11 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCart();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     register,
@@ -40,19 +45,19 @@ export default function CheckoutPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (mounted && !authLoading && !isAuthenticated) {
       toast.error('Você precisa estar logado para finalizar a compra');
       router.push('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [mounted, isAuthenticated, authLoading, router]);
 
   // Redirect to cart if empty
   useEffect(() => {
-    if (items.length === 0) {
+    if (mounted && items.length === 0) {
       toast.error('Seu carrinho está vazio');
       router.push('/cart');
     }
-  }, [items.length, router]);
+  }, [mounted, items.length, router]);
 
   const createOrderMutation = useMutation({
     mutationFn: async (data: CheckoutFormData) => {
@@ -96,7 +101,7 @@ export default function CheckoutPage() {
 
   const total = getTotal();
 
-  if (authLoading || items.length === 0) {
+  if (!mounted || authLoading) {
     return (
       <div className="bg-background-light dark:bg-background min-h-screen">
         <div className="container mx-auto px-6 md:px-8 py-16 text-center">
@@ -261,10 +266,10 @@ export default function CheckoutPage() {
                 )}
               </CardContent>
             </Card>
-          </div>
+            </div>
 
-          {/* Resumo do pedido */}
-          <div>
+            {/* Resumo do pedido */}
+            <div className="lg:col-span-1">
             <Card className="sticky top-24">
               <CardHeader className="py-6 px-6">
                 <CardTitle className="text-2xl font-bold font-display">Resumo do Pedido</CardTitle>
@@ -333,8 +338,9 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
