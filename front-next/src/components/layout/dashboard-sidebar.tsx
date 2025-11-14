@@ -14,16 +14,14 @@ const menuItems = [
   {
     icon: Package,
     label: 'Products',
-    href: '/dashboard/products',
-    disabled: true,
-    badge: 'Em breve',
+    href: '/products',
+    disabled: false,
   },
   {
     icon: ShoppingCart,
     label: 'Orders',
-    href: '/dashboard/orders',
-    disabled: true,
-    badge: 'Em breve',
+    href: '/my-orders',
+    disabled: false,
   },
   {
     icon: BarChart3,
