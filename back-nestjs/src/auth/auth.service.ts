@@ -79,13 +79,18 @@ export class AuthService {
       },
     });
 
-    const token = this.generateToken(user);
+    const tokens = await this.generateTokens(user);
+
+    // Salvar refresh token no banco
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: tokens.refreshToken },
+    });
 
     return {
       user: this.sanitizeUser(user),
       organization: user.organization,
-      token,
-      expiresIn: '7d',
+      ...tokens,
     };
   }
 
@@ -108,12 +113,17 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const token = this.generateToken(user);
+    const tokens = await this.generateTokens(user);
+
+    // Salvar refresh token no banco
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken: tokens.refreshToken },
+    });
 
     return {
       user: this.sanitizeUser(user),
-      token,
-      expiresIn: '7d',
+      ...tokens,
     };
   }
 
@@ -137,7 +147,48 @@ export class AuthService {
     });
   }
 
-  private generateToken(user: any): string {
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+      });
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        include: { organization: true },
+      });
+
+      if (!user || !user.isActive || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const tokens = await this.generateTokens(user);
+
+      // Atualizar refresh token no banco
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { refreshToken: tokens.refreshToken },
+      });
+
+      return {
+        ...tokens,
+        user: this.sanitizeUser(user),
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async logout(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
+
+    return { message: 'Logout successful' };
+  }
+
+  private async generateTokens(user: any) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -145,11 +196,29 @@ export class AuthService {
       organizationId: user.organizationId,
     };
 
-    return this.jwtService.sign(payload);
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_SECRET || 'default-secret-change-in-production',
+        expiresIn: '15m', // Token de acesso curto
+      }),
+      this.jwtService.signAsync(payload, {
+        secret:
+          process.env.JWT_REFRESH_SECRET ||
+          process.env.JWT_SECRET ||
+          'default-secret-change-in-production',
+        expiresIn: '7d', // Refresh token longo
+      }),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: '15m',
+    };
   }
 
   private sanitizeUser(user: any) {
-    const { passwordHash, ...sanitized } = user;
+    const { passwordHash, refreshToken, ...sanitized } = user;
     return sanitized;
   }
 

@@ -25,7 +25,8 @@ export interface Organization {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
   expiresIn?: string;
   organization?: Organization;
 }
