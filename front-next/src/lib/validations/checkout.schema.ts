@@ -37,7 +37,7 @@ export const checkoutSchema = z.object({
 
   paymentMethod: z
     .enum(['pix', 'credit_card', 'debit_card', 'boleto'], {
-      errorMap: () => ({ message: 'Selecione um método de pagamento' }),
+      message: 'Selecione um método de pagamento',
     }),
 });
 
