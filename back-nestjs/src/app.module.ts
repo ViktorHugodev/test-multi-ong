@@ -12,6 +12,7 @@ import redisConfig from './config/redis.config';
 // Modules
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -37,6 +38,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     }),
     DatabaseModule,
     AuthModule,
+    UsersModule,
     OrganizationsModule,
     ProductsModule,
     OrdersModule,

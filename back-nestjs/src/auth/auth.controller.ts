@@ -30,4 +30,16 @@ export class AuthController {
   async getProfile(@CurrentUser('id') userId: string) {
     return this.authService.getProfile(userId);
   }
+
+  @Public()
+  @Post('refresh')
+  async refresh(@Body() body: { refreshToken: string }) {
+    return this.authService.refreshToken(body.refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  async logout(@CurrentUser('id') userId: string) {
+    return this.authService.logout(userId);
+  }
 }
