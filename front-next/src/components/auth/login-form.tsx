@@ -28,14 +28,14 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>Entre com sua conta para continuar</CardDescription>
+      <CardHeader className="py-6 px-6">
+        <CardTitle className="text-2xl font-bold font-display">Login</CardTitle>
+        <CardDescription className="text-base">Entre com sua conta para continuar</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+      <CardContent className="px-6 pb-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-base font-semibold">Email</Label>
             <Input
               id="email"
               type="email"
@@ -45,23 +45,23 @@ export function LoginForm() {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Senha</Label>
+          <div className="space-y-3">
+            <Label htmlFor="password" className="text-base font-semibold">Senha</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Digite sua senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
             {isLoading ? 'Entrando...' : 'Entrar'}
           </Button>
-          <p className="text-sm text-center text-muted-foreground">
+          <p className="text-base text-center text-muted-foreground">
             Não tem uma conta?{' '}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-primary hover:text-primary/90 transition-colors">
               Cadastre-se
             </Link>
           </p>

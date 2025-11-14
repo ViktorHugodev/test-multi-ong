@@ -53,21 +53,29 @@ export default function MyOrdersPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16 text-center">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Erro ao carregar pedidos</h1>
-        <p className="text-muted-foreground mb-6">
-          Ocorreu um erro ao carregar seus pedidos. Tente novamente mais tarde.
-        </p>
-        <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16">
+          <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm max-w-2xl mx-auto">
+            <Package className="h-24 w-24 mx-auto text-muted-foreground mb-6" />
+            <h1 className="text-4xl font-bold font-display mb-4">Erro ao carregar pedidos</h1>
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              Ocorreu um erro ao carregar seus pedidos. Tente novamente mais tarde.
+            </p>
+            <Button onClick={() => window.location.reload()} size="lg" className="h-12 text-base">
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -76,66 +84,69 @@ export default function MyOrdersPage() {
 
   if (orders.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Nenhum pedido encontrado</h1>
-          <p className="text-muted-foreground mb-6">
-            Você ainda não realizou nenhum pedido
-          </p>
-          <Button asChild>
-            <Link href="/">Começar a Comprar</Link>
-          </Button>
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-16">
+          <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm max-w-2xl mx-auto">
+            <ShoppingBag className="h-24 w-24 mx-auto text-muted-foreground mb-6" />
+            <h1 className="text-4xl font-bold font-display mb-4">Nenhum pedido encontrado</h1>
+            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+              Você ainda não realizou nenhum pedido
+            </p>
+            <Button asChild size="lg" className="h-12 text-base">
+              <Link href="/">Começar a Comprar</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Meus Pedidos</h1>
-        <Button variant="outline" asChild>
-          <Link href="/">Continuar Comprando</Link>
-        </Button>
-      </div>
+    <div className="bg-background-light dark:bg-background min-h-screen">
+      <div className="container mx-auto px-6 md:px-8 py-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <h1 className="text-4xl md:text-5xl font-bold font-display">Meus Pedidos</h1>
+          <Button variant="outline" asChild className="h-11">
+            <Link href="/">Continuar Comprando</Link>
+          </Button>
+        </div>
 
-      <div className="space-y-4">
+        <div className="space-y-6">
         {orders.map((order) => (
-          <Card key={order.id} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-lg">
+          <Card key={order.id} className="hover:shadow-lg transition-all">
+            <CardHeader className="py-6 px-6">
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl font-bold font-display">
                     Pedido #{order.orderNumber}
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-base text-muted-foreground">
                     Realizado em {formatDate(order.createdAt)}
                   </p>
                 </div>
                 {getStatusBadge(order.status)}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="px-6 pb-6">
+              <div className="space-y-6">
                 {/* Items Preview */}
-                <div>
-                  <p className="text-sm font-medium mb-2">
+                <div className="space-y-3">
+                  <p className="text-base font-semibold">
                     {order.items.length} {order.items.length === 1 ? 'item' : 'itens'}
                   </p>
-                  <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="text-base space-y-3">
                     {order.items.slice(0, 3).map((item) => (
-                      <div key={item.id} className="flex justify-between">
-                        <span>
-                          {item.productName} (×{item.quantity})
+                      <div key={item.id} className="flex justify-between gap-4">
+                        <span className="text-muted-foreground">
+                          {item.productName} <span className="font-medium text-foreground">(×{item.quantity})</span>
                         </span>
-                        <span className="font-medium text-foreground">
+                        <span className="font-semibold text-foreground whitespace-nowrap">
                           {formatCurrency(item.subtotal)}
                         </span>
                       </div>
                     ))}
                     {order.items.length > 3 && (
-                      <p className="text-xs italic">
+                      <p className="text-sm italic text-muted-foreground">
                         +{order.items.length - 3} {order.items.length - 3 === 1 ? 'item' : 'itens'}
                       </p>
                     )}
@@ -143,19 +154,19 @@ export default function MyOrdersPage() {
                 </div>
 
                 {/* Total and Actions */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total</p>
-                    <p className="text-xl font-bold">
+                <div className="flex flex-col md:flex-row md:items-center justify-between pt-6 border-t border-border gap-4">
+                  <div className="space-y-1">
+                    <p className="text-base text-muted-foreground">Total</p>
+                    <p className="text-3xl font-bold text-primary font-display">
                       {formatCurrency(order.totalAmount)}
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button asChild variant="outline" size="sm">
+                  <div className="flex gap-3 flex-wrap">
+                    <Button asChild variant="outline" className="h-11">
                       <Link href={`/order-success/${order.id}`}>Ver Detalhes</Link>
                     </Button>
                     {order.status === 'confirmed' && (
-                      <Button asChild size="sm">
+                      <Button asChild className="h-11">
                         <Link href="/">Comprar Novamente</Link>
                       </Button>
                     )}
@@ -168,10 +179,11 @@ export default function MyOrdersPage() {
       </div>
 
       {data?.meta && data.meta.totalPages > 1 && (
-        <div className="mt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 text-center text-base text-muted-foreground">
           Mostrando {orders.length} de {data.meta.total} pedidos
         </div>
       )}
+      </div>
     </div>
   );
 }
