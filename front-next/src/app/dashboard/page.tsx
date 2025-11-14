@@ -110,7 +110,11 @@ export default function DashboardPage() {
             <option>Last 7 Days</option>
             <option>Last 90 Days</option>
           </select>
-          <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <button
+            disabled
+            title="Funcionalidade em desenvolvimento"
+            className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2 opacity-60"
+          >
             <span className="material-symbols-outlined text-lg">add_circle</span>
             Add New Product
           </button>

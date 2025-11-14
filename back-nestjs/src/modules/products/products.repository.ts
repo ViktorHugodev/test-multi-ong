@@ -3,6 +3,7 @@ import { PrismaService } from '../../database/prisma/prisma.service';
 import { BaseRepository } from '../../database/repositories/base.repository';
 import { Product, Prisma } from '@prisma/client';
 import { ProductFiltersDto } from './dto/product-filters.dto';
+import { PaginatedResponseDto } from './dto/paginated-response.dto';
 
 @Injectable()
 export class ProductsRepository extends BaseRepository<Product> {
@@ -20,7 +21,7 @@ export class ProductsRepository extends BaseRepository<Product> {
   async findByOrganization(
     organizationId: string,
     filters?: ProductFiltersDto,
-  ): Promise<{ products: Product[]; total: number }> {
+  ): Promise<PaginatedResponseDto<Product>> {
     const where: Prisma.ProductWhereInput = {
       organizationId,
       isActive: true,
@@ -49,8 +50,8 @@ export class ProductsRepository extends BaseRepository<Product> {
     }
 
     const page = filters?.page || 1;
-    const limit = filters?.pageSize || filters?.limit || 20;
-    const skip = (page - 1) * limit;
+    const pageSize = filters?.pageSize || filters?.limit || 20;
+    const skip = (page - 1) * pageSize;
 
     // Ordenação dinâmica
     const sortBy = filters?.sortBy || 'createdAt';
@@ -59,18 +60,18 @@ export class ProductsRepository extends BaseRepository<Product> {
       [sortBy]: sortOrder,
     };
 
-    const [products, total] = await Promise.all([
+    const [items, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
-        take: limit,
+        take: pageSize,
         orderBy,
         include: { organization: true },
       }),
       this.prisma.product.count({ where }),
     ]);
 
-    return { products, total };
+    return new PaginatedResponseDto(items, page, pageSize, total);
   }
 
   /**
@@ -78,7 +79,7 @@ export class ProductsRepository extends BaseRepository<Product> {
    */
   async findPublicProducts(
     filters?: ProductFiltersDto,
-  ): Promise<{ products: Product[]; total: number }> {
+  ): Promise<PaginatedResponseDto<Product>> {
     const where: Prisma.ProductWhereInput = {
       isActive: true,
       deletedAt: null,
@@ -111,8 +112,8 @@ export class ProductsRepository extends BaseRepository<Product> {
     }
 
     const page = filters?.page || 1;
-    const limit = filters?.pageSize || filters?.limit || 20;
-    const skip = (page - 1) * limit;
+    const pageSize = filters?.pageSize || filters?.limit || 20;
+    const skip = (page - 1) * pageSize;
 
     // Ordenação dinâmica
     const sortBy = filters?.sortBy || 'createdAt';
@@ -121,18 +122,18 @@ export class ProductsRepository extends BaseRepository<Product> {
       [sortBy]: sortOrder,
     };
 
-    const [products, total] = await Promise.all([
+    const [items, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
-        take: limit,
+        take: pageSize,
         orderBy,
         include: { organization: true },
       }),
       this.prisma.product.count({ where }),
     ]);
 
-    return { products, total };
+    return new PaginatedResponseDto(items, page, pageSize, total);
   }
 
   /**

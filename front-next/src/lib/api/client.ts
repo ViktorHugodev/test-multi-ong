@@ -16,11 +16,15 @@ apiClient.interceptors.request.use(
       const token = localStorage.getItem('auth_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('🔑 Token incluído na requisição:', config.url, `Bearer ${token.substring(0, 20)}...`);
+      } else {
+        console.log('⚠️ Nenhum token disponível para:', config.url);
       }
     }
     return config;
   },
   (error) => {
+    console.error('❌ Erro no request interceptor:', error);
     return Promise.reject(error);
   }
 );

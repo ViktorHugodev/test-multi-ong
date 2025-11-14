@@ -8,7 +8,19 @@ import { ProductGrid } from '@/components/products/product-grid';
 import { ProductFilters } from '@/components/products/product-filters';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ProductFilters as IProductFilters } from '@/types/product.types';
+import { ProductFilters as IProductFilters, PaginatedResponse, Product } from '@/types/product.types';
+
+// Helper function to check if data has valid structure
+const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
+  return Boolean(
+    data &&
+    typeof data === 'object' &&
+    Array.isArray(data.items) &&
+    data.items.length > 0 &&
+    data.meta &&
+    typeof data.meta === 'object'
+  );
+};
 
 const ProductsPage = () => {
   const [filters, setFilters] = useState<IProductFilters>({
@@ -73,7 +85,7 @@ const ProductsPage = () => {
                   Tente novamente mais tarde ou entre em contato com o suporte.
                 </p>
               </div>
-            ) : data && data.items.length > 0 ? (
+            ) : hasValidProducts(data) ? (
               <>
                 {/* Results Count */}
                 <div className="flex items-center justify-between pb-4 border-b border-border">
