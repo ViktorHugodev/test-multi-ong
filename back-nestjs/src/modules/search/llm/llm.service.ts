@@ -16,9 +16,9 @@ export class LLMService {
   private readonly timeout: number;
 
   constructor(private config: ConfigService) {
-    this.apiUrl = this.config.get<string>('LLM_API_URL') || '';
-    this.apiKey = this.config.get<string>('LLM_API_KEY') || '';
-    this.timeout = this.config.get<number>('LLM_TIMEOUT', 3000);
+    this.apiUrl = this.config.get<string>('OPENAI_API_URL') || 'https://api.openai.com/v1/chat/completions';
+    this.apiKey = this.config.get<string>('OPENAI_API_KEY') || '';
+    this.timeout = this.config.get<number>('OPENAI_TIMEOUT') || 3000;
   }
 
   async extractFilters(query: string): Promise<SearchFilters> {
@@ -48,6 +48,10 @@ export class LLMService {
   }
 
   private async callLLM(query: string): Promise<SearchFilters> {
+    if (!this.apiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
     const response = await fetch(this.apiUrl, {
       method: 'POST',
       headers: {
@@ -55,7 +59,7 @@ export class LLMService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini', // Modelo mais rápido e barato
         messages: [
           { role: 'system', content: this.getSystemPrompt() },
           { role: 'user', content: query },
