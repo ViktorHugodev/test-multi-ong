@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,145 +14,111 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
-import { ProductFilters as IProductFilters } from '@/types/product.types';
 
-interface IProductFiltersProps {
-  filters: IProductFilters;
-  onFiltersChange: (filters: IProductFilters) => void;
+interface ProductFiltersProps {
+  categories?: string[];
 }
 
-const CATEGORIES = [
-  { value: 'apparel', label: 'Apparel' },
-  { value: 'home-goods', label: 'Home Goods' },
-  { value: 'accessories', label: 'Accessories' },
-  { value: 'food-drink', label: 'Food & Drink' },
-];
+export function ProductFilters({ categories = [] }: ProductFiltersProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-const SORT_OPTIONS = [
-  { value: 'createdAt-desc', label: 'Mais Recentes' },
-  { value: 'createdAt-asc', label: 'Mais Antigos' },
-  { value: 'price-asc', label: 'Menor Preço' },
-  { value: 'price-desc', label: 'Maior Preço' },
-  { value: 'name-asc', label: 'Nome (A-Z)' },
-  { value: 'name-desc', label: 'Nome (Z-A)' },
-];
+  // Estados locais para os filtros
+  const [category, setCategory] = useState(searchParams.get('category') || '');
+  const [priceMin, setPriceMin] = useState(searchParams.get('price_min') || '');
+  const [priceMax, setPriceMax] = useState(searchParams.get('price_max') || '');
 
-export function ProductFilters({ filters, onFiltersChange }: IProductFiltersProps) {
-  const [localFilters, setLocalFilters] = useState<IProductFilters>(filters);
-
+  // Aplicar filtros
   const handleApplyFilters = () => {
-    onFiltersChange(localFilters);
+    const params = new URLSearchParams();
+
+    if (category) params.set('category', category);
+    if (priceMin) params.set('price_min', priceMin);
+    if (priceMax) params.set('price_max', priceMax);
+
+    router.push(`/products?${params.toString()}`);
   };
 
+  // Limpar filtros
   const handleClearFilters = () => {
-    const clearedFilters: IProductFilters = {
-      page: 1,
-      pageSize: filters.pageSize,
-    };
-    setLocalFilters(clearedFilters);
-    onFiltersChange(clearedFilters);
+    setCategory('');
+    setPriceMin('');
+    setPriceMax('');
+    router.push('/products');
   };
 
-  const handleSortChange = (value: string) => {
-    const [sortBy, sortOrder] = value.split('-');
-    setLocalFilters({
-      ...localFilters,
-      sortBy,
-      sortOrder: sortOrder as 'asc' | 'desc',
-    });
-  };
-
-  const getCurrentSortValue = () => {
-    if (localFilters.sortBy && localFilters.sortOrder) {
-      return `${localFilters.sortBy}-${localFilters.sortOrder}`;
-    }
-    return 'createdAt-desc';
-  };
+  // Detectar se há filtros ativos
+  const hasActiveFilters = category || priceMin || priceMax;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24 space-y-6">
-      <h3 className="text-lg font-bold text-gray-900">Filter Products</h3>
-      
-      {/* Categories */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-gray-900">Categories</h4>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Filtros</span>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearFilters}
+              className="h-8 text-sm"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Limpar
+            </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Filtro de Categoria */}
         <div className="space-y-2">
-          {CATEGORIES.map((category) => (
-            <label key={category.value} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={localFilters.category === category.value}
-                onChange={(e) =>
-                  setLocalFilters({
-                    ...localFilters,
-                    category: e.target.checked ? category.value : undefined,
-                  })
-                }
-                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
-              />
-              <span className="text-sm text-gray-700">{category.label}</span>
-            </label>
-          ))}
+          <Label htmlFor="category">Categoria</Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger id="category">
+              <SelectValue placeholder="Todas as categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas as categorias</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
 
-      {/* Price Range */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-gray-900">Price Range</h4>
+        {/* Filtro de Faixa de Preço */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">$10</span>
-            <input
-              type="range"
-              min="10"
-              max="150"
-              value={localFilters.priceMin ?? 10}
-              onChange={(e) =>
-                setLocalFilters({
-                  ...localFilters,
-                  priceMin: Number(e.target.value),
-                })
-              }
-              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-            />
-            <span className="text-sm text-gray-600">$150+</span>
+          <Label>Faixa de Preço (R$)</Label>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input
+                type="number"
+                placeholder="Mín"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="flex-1">
+              <Input
+                type="number"
+                placeholder="Máx"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Cause - placeholder for future implementation */}
-      <div className="space-y-3">
-        <h4 className="text-sm font-semibold text-gray-900">Cause</h4>
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
-            />
-            <span className="text-sm text-gray-700">Environment</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
-            />
-            <span className="text-sm text-gray-700">Education</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/50"
-            />
-            <span className="text-sm text-gray-700">Animal Welfare</span>
-          </label>
-        </div>
-      </div>
-
-      <div className="pt-4 border-t border-gray-200">
+        {/* Botão Aplicar */}
         <Button onClick={handleApplyFilters} className="w-full">
-          Apply Filters
+          Aplicar Filtros
         </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
