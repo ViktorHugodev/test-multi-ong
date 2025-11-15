@@ -2,13 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { winstonLoggerConfig } from './common/logger/winston-logger.config';
 
 async function bootstrap() {
-  const logger = new Logger('Bootstrap');
+  // Create app with Winston logger
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: winstonLoggerConfig,
   });
 
+  const logger = new Logger('Bootstrap');
   const configService = app.get(ConfigService);
 
   // Global prefix
@@ -40,6 +42,7 @@ async function bootstrap() {
   logger.log(`🔐 JWT configured`);
   logger.log(`📦 Redis configured for Bull queues`);
   logger.log(`🗄️ Database connected`);
+  logger.log(`📊 Winston logger configured (${process.env.NODE_ENV === 'production' ? 'JSON' : 'Pretty'} format)`);
 }
 
 bootstrap().catch((error) => {
