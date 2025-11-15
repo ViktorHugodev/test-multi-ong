@@ -283,7 +283,7 @@ POST {{baseUrl}}/public/search
 Content-Type: application/json
 
 {
-  "query": "alimentos orgânicos"
+  "query": "alimentos"
 }
 
 ### Intelligent Search with Pagination
