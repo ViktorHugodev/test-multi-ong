@@ -1,9 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
+import request from 'supertest';
 import { TestSetupHelper } from './helpers/test-setup.helper';
-import { PrismaService } from '../src/database/prisma.service';
 import { CacheService } from '../src/common/cache/cache.service';
 
 /**
@@ -22,23 +19,15 @@ import { CacheService } from '../src/common/cache/cache.service';
 describe('Cache Performance Benchmarks (e2e)', () => {
   let app: INestApplication;
   let testHelper: TestSetupHelper;
-  let prisma: PrismaService;
   let cacheService: CacheService;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = await testHelper.setupApp(moduleFixture);
-    prisma = testHelper.getPrisma();
+    testHelper = new TestSetupHelper();
+    app = await testHelper.setupApp();
     cacheService = app.get(CacheService);
-
-    await app.init();
   });
 
   beforeEach(async () => {
-    testHelper = new TestSetupHelper();
     await testHelper.cleanDatabase();
 
     // Clear all cache before each test
@@ -47,7 +36,7 @@ describe('Cache Performance Benchmarks (e2e)', () => {
 
   afterAll(async () => {
     await testHelper.cleanDatabase();
-    await app.close();
+    await testHelper.closeApp();
   });
 
   /**

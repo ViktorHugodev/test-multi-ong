@@ -2,10 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsRepository } from './products.repository';
+import { ProductsCacheService } from './products-cache.service';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let repository: ProductsRepository;
+
+  const mockProductsCacheService = {
+    invalidateOnCreate: jest.fn(),
+    invalidateOnUpdate: jest.fn(),
+    invalidateOnDelete: jest.fn(),
+    getProductListing: jest.fn(),
+    setProductListing: jest.fn(),
+    getPublicListing: jest.fn(),
+    setPublicListing: jest.fn(),
+    getProduct: jest.fn(),
+    setProduct: jest.fn(),
+  } as Partial<ProductsCacheService> as ProductsCacheService;
 
   const mockProductsRepository = {
     create: jest.fn(),
@@ -45,6 +58,10 @@ describe('ProductsService', () => {
         {
           provide: ProductsRepository,
           useValue: mockProductsRepository,
+        },
+        {
+          provide: ProductsCacheService,
+          useValue: mockProductsCacheService,
         },
       ],
     }).compile();
