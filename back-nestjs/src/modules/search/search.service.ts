@@ -8,6 +8,13 @@ import { Prisma } from '@prisma/client';
 export class SearchService {
   private readonly logger = new Logger(SearchService.name);
 
+  // Circuit Breaker state
+  private failureCount = 0;
+  private circuitOpen = false;
+  private circuitOpenUntil: Date | null = null;
+  private readonly FAILURE_THRESHOLD = 3;
+  private readonly CIRCUIT_TIMEOUT = 2 * 60 * 1000; // 2 minutos
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly llmService: LLMService,
@@ -20,13 +27,23 @@ export class SearchService {
     let fallbackUsed = false;
     let filters: SearchFilters;
 
-    // Try AI first
-    try {
-      filters = await this.llmService.extractFilters(query);
-      aiSuccess = true;
-    } catch (error) {
-      // AI failed - use fallback
-      this.logger.warn(`AI failed, using fallback: ${error.message}`);
+    // Check circuit breaker
+    if (this.shouldUseLLM()) {
+      // Try AI first
+      try {
+        filters = await this.llmService.extractFilters(query);
+        aiSuccess = true;
+        this.recordSuccess();
+      } catch (error) {
+        // AI failed - record failure and use fallback
+        this.logger.warn(`AI failed, using fallback: ${error.message}`);
+        this.recordFailure();
+        filters = this.textSearchService.generateFallbackFilters(query);
+        fallbackUsed = true;
+      }
+    } else {
+      // Circuit is open - use fallback directly
+      this.logger.warn('Circuit breaker open, using fallback directly');
       filters = this.textSearchService.generateFallbackFilters(query);
       fallbackUsed = true;
     }
@@ -148,5 +165,44 @@ export class SearchService {
     } catch (error) {
       this.logger.error('Failed to log search', error);
     }
+  }
+
+  // Circuit Breaker methods
+  private shouldUseLLM(): boolean {
+    if (!this.circuitOpen) return true;
+
+    if (this.circuitOpenUntil && new Date() > this.circuitOpenUntil) {
+      this.circuitOpen = false;
+      this.failureCount = 0;
+      this.logger.log('Circuit breaker closed, retrying LLM');
+      return true;
+    }
+
+    return false;
+  }
+
+  private recordFailure(): void {
+    this.failureCount++;
+    if (this.failureCount >= this.FAILURE_THRESHOLD) {
+      this.circuitOpen = true;
+      this.circuitOpenUntil = new Date(Date.now() + this.CIRCUIT_TIMEOUT);
+      this.logger.warn(
+        `Circuit breaker opened for LLM service until ${this.circuitOpenUntil.toISOString()}`,
+      );
+    }
+  }
+
+  private recordSuccess(): void {
+    if (this.failureCount > 0) {
+      this.failureCount = 0;
+      this.logger.log('LLM service recovered, failure count reset');
+    }
+  }
+
+  getHealthStatus(): { llmAvailable: boolean; circuitOpen: boolean } {
+    return {
+      llmAvailable: !this.circuitOpen,
+      circuitOpen: this.circuitOpen,
+    };
   }
 }

@@ -3,15 +3,22 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { OrdersRepository } from './orders.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
+import {
+  InsufficientStockException,
+  StockError,
+} from './exceptions/insufficient-stock.exception';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly repository: OrdersRepository,
@@ -61,7 +68,7 @@ export class OrdersService {
         });
 
         // 4. VALIDATE STOCK
-        const stockErrors: string[] = [];
+        const stockErrors: StockError[] = [];
 
         for (const item of dto.items) {
           const product = products.find((p) => p.id === item.productId);
@@ -73,16 +80,18 @@ export class OrdersService {
           }
 
           if (product.stockQty < item.quantity) {
-            stockErrors.push(
-              `${product.name}: requested ${item.quantity}, available ${product.stockQty}`,
-            );
+            stockErrors.push({
+              productId: product.id,
+              productName: product.name,
+              requested: item.quantity,
+              available: product.stockQty,
+            });
           }
         }
 
         if (stockErrors.length > 0) {
-          throw new ConflictException(
-            `Insufficient stock: ${stockErrors.join('; ')}`,
-          );
+          this.logger.warn('Insufficient stock detected', { stockErrors });
+          throw new InsufficientStockException(stockErrors);
         }
 
         // 5. CALCULATE TOTAL
