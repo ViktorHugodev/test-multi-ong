@@ -74,7 +74,8 @@ describe('Multi-Tenant Security Isolation (e2e)', () => {
       const productCheck = await testHelper.getPrisma().product.findUnique({
         where: { id: productB.id },
       });
-      expect(productCheck.name).toBe('Product B');
+      expect(productCheck).not.toBeNull();
+      expect(productCheck!.name).toBe('Product B');
     });
 
     it('should NOT allow ONG A to delete ONG B product', async () => {
@@ -88,7 +89,7 @@ describe('Multi-Tenant Security Isolation (e2e)', () => {
         where: { id: productB.id },
       });
       expect(productCheck).not.toBeNull();
-      expect(productCheck.deletedAt).toBeNull();
+      expect(productCheck!.deletedAt).toBeNull();
     });
 
     it('should allow ONG A to view their own products', async () => {

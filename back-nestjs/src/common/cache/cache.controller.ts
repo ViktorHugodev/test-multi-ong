@@ -173,7 +173,9 @@ export class CacheController {
     try {
       // Test Redis connection with a simple operation
       const testKey = 'health:check';
-      await this.cacheService.set(testKey, { timestamp: Date.now() }, 10);
+      await this.cacheService.set(testKey, { timestamp: Date.now() }, {
+        ttl: 10,
+      });
       const result = await this.cacheService.get(testKey);
 
       const latency = Date.now() - startTime;
