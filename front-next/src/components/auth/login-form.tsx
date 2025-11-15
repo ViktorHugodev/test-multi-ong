@@ -1,26 +1,54 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/lib/hooks/use-auth';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
+
     try {
-      await login({ email, password });
-    } catch {
-      // Error handled by auth context
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Email ou senha inválidos');
+        toast.error('Erro no login', {
+          description: 'Email ou senha inválidos',
+        });
+        return;
+      }
+
+      toast.success('Login realizado com sucesso!', {
+        description: 'Redirecionando...',
+      });
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (error) {
+      setError('Ocorreu um erro ao fazer login');
+      toast.error('Erro no login', {
+        description: 'Ocorreu um erro inesperado',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -34,6 +62,12 @@ export function LoginForm() {
       </CardHeader>
       <CardContent className="px-6 pb-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="space-y-3">
             <Label htmlFor="email" className="text-base font-semibold">Email</Label>
             <Input

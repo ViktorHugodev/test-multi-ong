@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/hooks/use-auth';
+import { useSession, signOut } from 'next-auth/react';
 import { useCart } from '@/lib/hooks/use-cart';
 import { ShoppingCart, Heart, Search, User, Package } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,7 +17,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const isAuthenticated = status === 'authenticated';
   const cartItems = useCart((state) => state.items);
   const [mounted, setMounted] = useState(false);
 
@@ -27,6 +29,10 @@ export function Header() {
   }, []);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' });
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
@@ -83,17 +89,17 @@ export function Header() {
                 <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary text-white text-sm">
-                      {user?.fullName?.charAt(0) || 'U'}
+                      {user?.name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <span className="hidden md:block text-sm font-medium">
-                    {user?.fullName?.split(' ')[0] || 'User'}
+                    {user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'User'}
                   </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-3 py-2">
-                  <p className="text-sm font-medium">{user?.fullName}</p>
+                  <p className="text-sm font-medium">{user?.name || user?.email}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
@@ -115,7 +121,7 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
