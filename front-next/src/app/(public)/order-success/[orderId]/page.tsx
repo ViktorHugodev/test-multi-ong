@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@/lib/api/orders';
-import { useAuth } from '@/lib/hooks/use-auth';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -12,11 +12,12 @@ import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatDate } from '@/lib/utils/format-date';
 import { CheckCircle2, Loader2, Package } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthNextAuth } from '@/lib/hooks/use-auth-nextauth';
 
 export default function OrderSuccessPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuthNextAuth();
   const orderId = params.orderId as string;
 
   useEffect(() => {

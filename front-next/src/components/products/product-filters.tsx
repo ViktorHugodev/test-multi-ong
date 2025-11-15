@@ -14,9 +14,12 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X } from 'lucide-react';
+import type { ProductFilters as IProductFilters } from '@/types/product.types';
 
 interface ProductFiltersProps {
   categories?: string[];
+  filters?: IProductFilters;
+  onFiltersChange?: (newFilters: IProductFilters) => void;
 }
 
 export function ProductFilters({ categories = [] }: ProductFiltersProps) {

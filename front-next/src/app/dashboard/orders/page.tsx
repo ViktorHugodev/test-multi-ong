@@ -4,17 +4,18 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@/lib/api/orders';
-import { useAuth } from '@/lib/hooks/use-auth';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils/format-currency';
 import { formatDate } from '@/lib/utils/format-date';
 import { Loader2, Package, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthNextAuth } from '@/lib/hooks/use-auth-nextauth';
 
 export default function MyOrdersPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuthNextAuth();
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
