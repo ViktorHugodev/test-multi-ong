@@ -18,6 +18,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { SearchModule } from './modules/search/search.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { CacheModule } from './common/cache/cache.module';
 
 // Common
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -37,6 +38,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       },
     }),
     DatabaseModule,
+    CacheModule,
     AuthModule,
     UsersModule,
     OrganizationsModule,
