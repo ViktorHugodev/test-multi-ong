@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
 
 import { productsApi } from '@/lib/api/products';
 import { ProductGrid } from '@/components/products/product-grid';
+import { ProductFilters } from '@/components/products/product-filters';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaginatedResponse, Product } from '@/types/product.types';
@@ -22,13 +24,28 @@ const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
 };
 
 const ProductsPage = () => {
+  const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
+  // Pegar filtros da URL
+  const category = searchParams.get('category') || undefined;
+  const priceMin = searchParams.get('price_min') ? parseFloat(searchParams.get('price_min')!) : undefined;
+  const priceMax = searchParams.get('price_max') ? parseFloat(searchParams.get('price_max')!) : undefined;
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page],
-    queryFn: () => productsApi.getPublicProducts({ page, pageSize }),
+    queryKey: ['products', page, category, priceMin, priceMax],
+    queryFn: () => productsApi.getPublicProducts({
+      page,
+      pageSize,
+      category,
+      priceMin,
+      priceMax,
+    }),
   });
+
+  // Buscar categorias únicas (simulado - em produção viria da API)
+  const categories = ['apparel', 'home-goods', 'accessories', 'food-drink'];
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -48,8 +65,16 @@ const ProductsPage = () => {
           </p>
         </div>
 
-        {/* Main Content - Products */}
-        <div className="space-y-8">
+        {/* Main Layout: Sidebar + Content */}
+        <div className="grid gap-8 lg:grid-cols-4">
+          {/* Sidebar de Filtros */}
+          <aside className="lg:col-span-1">
+            <ProductFilters categories={categories} />
+          </aside>
+
+          {/* Main Content - Products */}
+          <main className="lg:col-span-3">
+            <div className="space-y-8">
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 9 }).map((_, i) => (
@@ -107,6 +132,8 @@ const ProductsPage = () => {
                 </div>
               </div>
             )}
+            </div>
+          </main>
         </div>
       </div>
     </div>
