@@ -4,11 +4,19 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
+// Configurações de tempo de expiração (em segundos)
+const SESSION_MAX_AGE = Number(process.env.SESSION_MAX_AGE) || 30 * 24 * 60 * 60; // Default: 30 days
+const JWT_MAX_AGE = Number(process.env.JWT_MAX_AGE) || 30 * 24 * 60 * 60; // Default: 30 days
+
 export const authConfig = {
   adapter: PrismaAdapter(prisma) as any,
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: SESSION_MAX_AGE, // Tempo de expiração da sessão
+    updateAge: 24 * 60 * 60, // Atualizar sessão a cada 24 horas
+  },
+  jwt: {
+    maxAge: JWT_MAX_AGE, // Tempo de expiração do token JWT
   },
   pages: {
     signIn: '/login',
