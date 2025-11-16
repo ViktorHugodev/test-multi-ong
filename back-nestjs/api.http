@@ -1,8 +1,9 @@
 ### Multi-ONG Marketplace API Tests
 ### Base URL
 @baseUrl = http://localhost:3333/api
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzI0Mjg1NywiZXhwIjoxNzYzMjQzNzU3fQ.B-EuxOeeCNuN6iGmjPuKSEUM2AyKlT9AEVW_AVmSZsE
-@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzI0Mjg1NywiZXhwIjoxNzYzODQ3NjU3fQ.quC-VltnbeA2D6CJvdAswWgospRsmLV7WErSgUoW85k
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzI1MDEzNywiZXhwIjoxNzYzMjUxMDM3fQ.XBMiEzhUJuSlit47gtWqjcbphFyyVmawb-tV78FZv-I
+
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjlmOGQxMS0wM2VhLTQxNmQtYjQ2Yi05ZTFkOTRhM2YyZGYiLCJlbWFpbCI6InZpY3RvckBnbWFpbC5jb20iLCJyb2xlIjoib25nX21hbmFnZXIiLCJvcmdhbml6YXRpb25JZCI6IjBmMDYwNGM2LTEzOWQtNGY0NC1hODY3LTQ5MWMwYjZmNDNhMiIsImlhdCI6MTc2MzI1MDEzNywiZXhwIjoxNzYzODU0OTM3fQ.Wrxq_aPkSsc7kIT7HHkv9i5UmdBwfdHiOYviovls6mY
 
 ### ============================================
 ### AUTHENTICATION
@@ -291,7 +292,7 @@ POST {{baseUrl}}/public/search?page=1&pageSize=20
 Content-Type: application/json
 
 {
-  "query": "produtos sustentáveis"
+  "query": "sustentáveis"
 }
 
 ### ============================================
