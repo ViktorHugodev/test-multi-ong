@@ -160,7 +160,7 @@ export function DashboardSidebar() {
       {/* Footer - Back to Marketplace */}
       <div className="p-6 border-t border-gray-200">
         <Link
-          href="/"
+          href="/products"
           className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors text-gray-700"
         >
           <ExternalLink className="h-4 w-4" />

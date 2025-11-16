@@ -164,19 +164,19 @@ export default function DashboardPage() {
                 <p>Nenhum pedido recente</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentOrders.slice(0, 5).map((order) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       <p className="font-medium text-sm">{order.customer}</p>
                       <p className="text-xs text-gray-500">
                         {formatDate(order.date)} • {order.items} {order.items === 1 ? 'item' : 'itens'}
                       </p>
                     </div>
-                    <div className="text-right space-y-1">
+                    <div className="text-right space-y-1.5">
                       <p className="font-semibold text-sm">{formatCurrency(order.total)}</p>
                       {getStatusBadge(order.status)}
                     </div>
@@ -189,43 +189,43 @@ export default function DashboardPage() {
 
         {/* Produtos Mais Vendidos / Ações Rápidas */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <CardTitle className="text-lg">Ações Rápidas</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start gap-3 h-12" asChild>
+          <CardContent className="space-y-4">
+            <Button variant="outline" className="w-full justify-start gap-4 h-14 px-4" asChild>
               <Link href="/dashboard/products">
-                <Package className="h-5 w-5 text-primary" />
+                <Package className="h-5 w-5 text-primary flex-shrink-0" />
                 <div className="text-left">
                   <p className="font-medium">Gerenciar Produtos</p>
-                  <p className="text-xs text-gray-500">Adicionar, editar ou remover produtos</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Adicionar, editar ou remover produtos</p>
                 </div>
               </Link>
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 h-12" asChild>
+            <Button variant="outline" className="w-full justify-start gap-4 h-14 px-4" asChild>
               <Link href="/dashboard/orders">
-                <ShoppingBag className="h-5 w-5 text-primary" />
+                <ShoppingBag className="h-5 w-5 text-primary flex-shrink-0" />
                 <div className="text-left">
                   <p className="font-medium">Ver Pedidos</p>
-                  <p className="text-xs text-gray-500">Acompanhar status e histórico</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Acompanhar status e histórico</p>
                 </div>
               </Link>
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 h-12" asChild>
-              <Link href="/dashboard/organization">
-                <Users className="h-5 w-5 text-primary" />
+            <Button variant="outline" className="w-full justify-start gap-4 h-14 px-4" asChild>
+              <Link href="/dashboard/organizations">
+                <Users className="h-5 w-5 text-primary flex-shrink-0" />
                 <div className="text-left">
                   <p className="font-medium">Minha Organização</p>
-                  <p className="text-xs text-gray-500">Configurações e informações da ONG</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Configurações e informações da ONG</p>
                 </div>
               </Link>
             </Button>
-            <Button variant="outline" className="w-full justify-start gap-3 h-12" asChild>
-              <Link href="/">
-                <TrendingUp className="h-5 w-5 text-primary" />
+            <Button variant="outline" className="w-full justify-start gap-4 h-14 px-4" asChild>
+              <Link href="/products">
+                <TrendingUp className="h-5 w-5 text-primary flex-shrink-0" />
                 <div className="text-left">
                   <p className="font-medium">Ver Marketplace</p>
-                  <p className="text-xs text-gray-500">Visualizar como cliente</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Visualizar como cliente</p>
                 </div>
               </Link>
             </Button>

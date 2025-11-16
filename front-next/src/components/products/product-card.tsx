@@ -70,19 +70,19 @@ export function ProductCard({ product }: IProductCardProps) {
         </div>
 
         {/* Product Info */}
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-5 space-y-4">
           {/* Category */}
           <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             {product.category}
           </p>
 
           {/* Product Name */}
-          <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors leading-snug">
             {product.name}
           </h3>
 
           {/* Price and Action */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <p className="text-2xl font-bold text-primary">
               {formatCurrency(product.price)}
             </p>

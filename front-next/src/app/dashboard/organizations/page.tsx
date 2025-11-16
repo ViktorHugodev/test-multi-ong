@@ -63,7 +63,7 @@ export default function OrganizationsPage() {
           </CardContent>
         </Card>
       ) : organizations && organizations.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {organizations.map((org: {
             id: string;
             name: string;
@@ -77,13 +77,13 @@ export default function OrganizationsPage() {
               key={org.id}
               className="hover:shadow-lg transition-all duration-300 group"
             >
-              <CardHeader className="pb-4">
+              <CardHeader className="p-6 pb-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors flex-shrink-0">
                     <Building2 className="h-7 w-7 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-xl font-bold truncate">
+                    <CardTitle className="text-xl font-bold truncate mb-1">
                       {org.name}
                     </CardTitle>
                     <p className="text-sm text-gray-500 font-mono">
@@ -92,27 +92,27 @@ export default function OrganizationsPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-6 pt-0 space-y-5">
                 {org.description && (
-                  <p className="text-sm text-gray-600 line-clamp-3">
+                  <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
                     {org.description}
                   </p>
                 )}
 
-                <div className="space-y-3 pt-2">
+                <div className="space-y-3 bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center gap-3 text-sm">
-                    <Mail className="h-4 w-4 text-gray-400" />
+                    <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
                     <span className="text-gray-900 truncate">{org.email}</span>
                   </div>
                   {org.phone && (
                     <div className="flex items-center gap-3 text-sm">
-                      <Phone className="h-4 w-4 text-gray-400" />
+                      <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <span className="text-gray-900">{org.phone}</span>
                     </div>
                   )}
                   {org.website && (
                     <div className="flex items-center gap-3 text-sm">
-                      <Globe className="h-4 w-4 text-gray-400" />
+                      <Globe className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <a
                         href={org.website}
                         target="_blank"
@@ -125,8 +125,8 @@ export default function OrganizationsPage() {
                   )}
                 </div>
 
-                <div className="pt-4 border-t border-gray-100">
-                  <Button variant="outline" className="w-full" asChild>
+                <div className="pt-2">
+                  <Button variant="outline" className="w-full h-11" asChild>
                     <Link href={`/dashboard/organizations/${org.id}`}>
                       Editar Organização
                     </Link>
