@@ -147,7 +147,7 @@ export default function ProfilePage() {
       {/* Asymmetric Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - User Info (2/3) */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
             {/* Current Info Card */}
             <Card className="border-none shadow-lg overflow-hidden">
               <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border-b">
@@ -391,6 +391,5 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

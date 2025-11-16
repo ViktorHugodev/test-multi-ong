@@ -127,9 +127,10 @@ export default function DashboardOrdersPage() {
           </div>
 
           {/* Orders List */}
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {orders.map((order) => (
-              <Card key={order.id} className="hover:shadow-md transition-all">
+              <Card key={order.id} className="hover:shadow-md transition-all
+              p-4">
                 <CardHeader className="pb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1">

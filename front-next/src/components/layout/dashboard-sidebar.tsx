@@ -19,18 +19,21 @@ const menuItems = [
     label: 'Visão Geral',
     href: '/dashboard',
     disabled: false,
+    badge: undefined as string | undefined,
   },
   {
     icon: Package,
     label: 'Meus Produtos',
     href: '/dashboard/products',
     disabled: false,
+    badge: undefined as string | undefined,
   },
   {
     icon: ShoppingBag,
     label: 'Pedidos',
     href: '/dashboard/orders',
     disabled: false,
+    badge: undefined as string | undefined,
   },
 ];
 
@@ -40,19 +43,21 @@ const secondaryMenuItems = [
     label: 'Minha ONG',
     href: '/dashboard/organizations',
     disabled: false,
+    badge: undefined as string | undefined,
   },
   {
     icon: User,
     label: 'Meu Perfil',
     href: '/dashboard/profile',
     disabled: false,
+    badge: undefined as string | undefined,
   },
   {
     icon: Settings,
     label: 'Configurações',
     href: '/dashboard/settings',
     disabled: true,
-    badge: 'Em breve',
+    badge: 'Em breve' as string | undefined,
   },
 ];
 
