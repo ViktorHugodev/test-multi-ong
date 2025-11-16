@@ -2,31 +2,38 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { Plus, Package, Search } from 'lucide-react';
 
 import { productsApi } from '@/lib/api/products';
 import { ProductGrid } from '@/components/products/product-grid';
 import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { EmptyState } from '../components/empty-state';
 import { PaginatedResponse, Product } from '@/types/product.types';
 
-// Helper function to check if data has valid structure
-const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
+const hasValidProducts = (data: unknown): data is PaginatedResponse<Product> => {
   return Boolean(
     data &&
     typeof data === 'object' &&
-    Array.isArray(data.items) &&
-    data.items.length > 0 &&
-    data.meta &&
-    typeof data.meta === 'object'
+    'items' in data &&
+    Array.isArray((data as PaginatedResponse<Product>).items) &&
+    'meta' in data &&
+    typeof (data as PaginatedResponse<Product>).meta === 'object'
   );
 };
 
 const ProductsPage = () => {
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const [searchTerm, setSearchTerm] = useState('');
+  const pageSize = 12;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page],
+    queryKey: ['dashboard-products', page],
     queryFn: () => productsApi.getPublicProducts({ page, pageSize }),
   });
 
@@ -35,80 +42,141 @@ const ProductsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Filter products by search term (client-side for now)
+  const filteredProducts = data?.items?.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   return (
-    <div className="bg-background-light dark:bg-background min-h-screen">
-      <div className="container mx-auto px-6 md:px-8 py-12">
-        {/* Page Header */}
-        <div className="mb-12 space-y-3">
-          <h1 className="text-5xl md:text-6xl font-bold font-display leading-tight">
-            Produtos
-          </h1>
-          <p className="text-muted-foreground text-xl leading-relaxed">
-            Explore todos os produtos disponíveis de nossas ONGs parceiras
+    <div className="p-8 space-y-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: 'Visão Geral', href: '/dashboard' },
+          { label: 'Meus Produtos', href: '/dashboard/products' },
+        ]}
+      />
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Meus Produtos</h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie os produtos da sua organização
           </p>
         </div>
-
-        {/* Main Content - Products */}
-        <div className="space-y-8">
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <Skeleton className="aspect-square w-full rounded-lg" />
-                    <Skeleton className="h-6 w-3/4 rounded-lg" />
-                    <Skeleton className="h-6 w-1/2 rounded-lg" />
-                  </div>
-                ))}
-              </div>
-            ) : error ? (
-              <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm">
-                <p className="text-destructive text-xl font-semibold font-display">
-                  Erro ao carregar produtos
-                </p>
-                <p className="text-muted-foreground text-base mt-3">
-                  Tente novamente mais tarde ou entre em contato com o suporte.
-                </p>
-              </div>
-            ) : hasValidProducts(data) ? (
-              <>
-                {/* Results Count */}
-                <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <p className="text-base text-muted-foreground">
-                    {data.meta.total} {data.meta.total === 1 ? 'produto encontrado' : 'produtos encontrados'}
-                  </p>
-                  <p className="text-base text-muted-foreground">
-                    Página {data.meta.page} de {data.meta.totalPages}
-                  </p>
-                </div>
-
-                {/* Products Grid */}
-                <ProductGrid products={data.items} />
-
-                {/* Pagination */}
-                <div className="pt-8">
-                  <Pagination
-                    currentPage={data.meta.page}
-                    totalPages={data.meta.totalPages}
-                    totalItems={data.meta.total}
-                    pageSize={data.meta.pageSize}
-                    onPageChange={handlePageChange}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-16 px-8 bg-card rounded-lg border border-border shadow-sm">
-                <div className="max-w-md mx-auto space-y-4">
-                  <p className="text-2xl font-bold font-display">
-                    Nenhum produto encontrado
-                  </p>
-                  <p className="text-base text-muted-foreground">
-                    Tente ajustar os filtros ou volte mais tarde para ver novos produtos.
-                  </p>
-                </div>
-              </div>
-            )}
-        </div>
+        <Button size="lg" className="gap-2" asChild>
+          <Link href="/dashboard/products/new">
+            <Plus className="h-5 w-5" />
+            Adicionar Produto
+          </Link>
+        </Button>
       </div>
+
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Buscar produtos por nome ou categoria..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-11"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="space-y-4">
+              <Skeleton className="aspect-square w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4 rounded" />
+              <Skeleton className="h-6 w-1/2 rounded" />
+            </div>
+          ))}
+        </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="py-16">
+            <EmptyState
+              icon={Package}
+              title="Erro ao carregar produtos"
+              description="Não foi possível carregar a lista de produtos. Verifique sua conexão e tente novamente."
+              action={
+                <Button onClick={() => window.location.reload()}>
+                  Tentar Novamente
+                </Button>
+              }
+            />
+          </CardContent>
+        </Card>
+      ) : hasValidProducts(data) && filteredProducts.length > 0 ? (
+        <>
+          {/* Results Count */}
+          <div className="flex items-center justify-between py-4 border-b border-gray-200">
+            <p className="text-gray-600">
+              {searchTerm
+                ? `${filteredProducts.length} ${filteredProducts.length === 1 ? 'produto encontrado' : 'produtos encontrados'}`
+                : `${data.meta.total} ${data.meta.total === 1 ? 'produto cadastrado' : 'produtos cadastrados'}`}
+            </p>
+            {!searchTerm && data.meta.totalPages > 1 && (
+              <p className="text-gray-600">
+                Página {data.meta.page} de {data.meta.totalPages}
+              </p>
+            )}
+          </div>
+
+          {/* Products Grid */}
+          <ProductGrid products={filteredProducts} />
+
+          {/* Pagination */}
+          {!searchTerm && data.meta.totalPages > 1 && (
+            <div className="pt-8">
+              <Pagination
+                currentPage={data.meta.page}
+                totalPages={data.meta.totalPages}
+                totalItems={data.meta.total}
+                pageSize={data.meta.pageSize}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <Card>
+          <CardContent className="py-16">
+            <EmptyState
+              icon={Package}
+              title={searchTerm ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
+              description={
+                searchTerm
+                  ? 'Tente buscar com outros termos ou limpe a busca para ver todos os produtos.'
+                  : 'Comece cadastrando seu primeiro produto para aparecer no marketplace e atrair clientes para sua ONG.'
+              }
+              action={
+                searchTerm ? (
+                  <Button variant="outline" onClick={() => setSearchTerm('')}>
+                    Limpar Busca
+                  </Button>
+                ) : (
+                  <Button size="lg" asChild>
+                    <Link href="/dashboard/products/new" className="gap-2">
+                      <Plus className="h-5 w-5" />
+                      Cadastrar Primeiro Produto
+                    </Link>
+                  </Button>
+                )
+              }
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
