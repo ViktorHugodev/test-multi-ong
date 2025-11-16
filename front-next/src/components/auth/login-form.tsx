@@ -1,8 +1,15 @@
+// ========================================
+// Arquivo: front-next/src/components/auth/login-form.tsx
+// Status: ✏️ CORRIGIDO
+// Problema Encontrado: Dupla autenticação (NextAuth + Backend API)
+// Solução Aplicada: Usar apenas NextAuth como fonte única
+// ========================================
+
 'use client';
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,12 +17,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
-import { authApi } from '@/lib/api/auth';
-import { useAuthStore } from '@/stores/auth-store';
 
 export function LoginForm() {
   const router = useRouter();
-  const { setTokens } = useAuthStore();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,40 +33,53 @@ export function LoginForm() {
     setError('');
     setIsLoading(true);
 
+    console.log('[LoginForm] Attempting login for:', email);
+
     try {
-      // Primeiro, autentica via NextAuth para configurar a sessao/cookies
+      // Autenticação única via NextAuth
+      // NextAuth valida credenciais diretamente no banco via Prisma
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false,
+        redirect: false, // Não redirecionar automaticamente
+        callbackUrl,
       });
 
+      console.log('[LoginForm] SignIn result:', result);
+
       if (result?.error) {
-        setError('Email ou senha inválidos');
+        console.error('[LoginForm] Authentication error:', result.error);
+
+        // Mapear erros para mensagens amigáveis
+        let errorMessage = 'Email ou senha inválidos';
+        if (result.error === 'Conta desativada') {
+          errorMessage = 'Sua conta foi desativada. Entre em contato com o suporte.';
+        } else if (result.error === 'Email e senha são obrigatórios') {
+          errorMessage = 'Por favor, preencha email e senha.';
+        }
+
+        setError(errorMessage);
         toast.error('Erro no login', {
-          description: 'Email ou senha inválidos',
+          description: errorMessage,
         });
         return;
       }
 
-      // Em seguida, autentica no backend NestJS para obter tokens JWT
-      try {
-        const loginResponse = await authApi.login(email, password);
-        setTokens(loginResponse.accessToken, loginResponse.refreshToken);
-      } catch (apiError) {
-        // Se falhar a obtencao de tokens, ainda assim o usuario esta logado via NextAuth,
-        // entao apenas registra o erro em log e segue com o fluxo de redirect.
-        console.error('Falha ao obter tokens do backend:', apiError);
+      // Login bem-sucedido
+      if (result?.ok) {
+        console.log('[LoginForm] Login successful, redirecting to:', callbackUrl);
+
+        toast.success('Login realizado com sucesso!', {
+          description: 'Redirecionando...',
+        });
+
+        // Redirecionar para callback URL ou dashboard
+        router.push(callbackUrl);
+        router.refresh(); // Forçar atualização do estado do servidor
       }
-
-      toast.success('Login realizado com sucesso!', {
-        description: 'Redirecionando...',
-      });
-
-      router.push('/dashboard');
-      router.refresh();
     } catch (error) {
-      setError('Ocorreu um erro ao fazer login');
+      console.error('[LoginForm] Unexpected error:', error);
+      setError('Ocorreu um erro ao fazer login. Tente novamente.');
       toast.error('Erro no login', {
         description: 'Ocorreu um erro inesperado',
       });
@@ -67,6 +87,16 @@ export function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  // ========================================
+  // Pontos Críticos da Correção:
+  // - REMOVIDO chamada ao backend NestJS (authApi.login)
+  // - REMOVIDO useAuthStore (não mais necessário)
+  // - Usando apenas NextAuth para autenticação
+  // - Suporte a callbackUrl para redirect pós-login
+  // - Logs detalhados para debug
+  // - Tratamento de erros mais específico
+  // ========================================
 
   return (
     <Card className="w-full max-w-md">
