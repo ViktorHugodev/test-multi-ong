@@ -110,30 +110,46 @@ export const authConfig = {
 
   callbacks: {
     async jwt({ token, user, trigger }) {
-      console.log('[NextAuth] JWT callback - trigger:', trigger, 'user:', !!user);
+      console.log('[NextAuth] JWT callback - trigger:', trigger, 'hasUser:', !!user);
 
       // Primeira autenticação - user object disponível
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.organizationId = user.organizationId;
-        token.accessToken = user.accessToken; // ← SALVAR TOKEN JWT
-        console.log('[NextAuth] Token populated with user data and accessToken');
+        token.id = user.id as string;
+        token.role = user.role as string;
+        token.organizationId = user.organizationId as string | null;
+        token.accessToken = user.accessToken as string; // ← SALVAR TOKEN JWT
+        console.log('[NextAuth] Token populated:', {
+          id: token.id,
+          role: token.role,
+          hasAccessToken: !!token.accessToken,
+          accessTokenLength: (token.accessToken as string)?.length,
+        });
       }
 
+      console.log('[NextAuth] JWT callback returning token with accessToken:', !!token.accessToken);
       return token;
     },
 
     async session({ session, token }) {
-      console.log('[NextAuth] Session callback - token:', !!token);
+      console.log('[NextAuth] Session callback - hasToken:', !!token, 'hasAccessToken:', !!token?.accessToken);
 
       // Adicionar dados do token à sessão
       if (token && session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.organizationId = token.organizationId;
-        session.accessToken = token.accessToken; // ← EXPOR TOKEN NA SESSÃO
-        console.log('[NextAuth] Session populated with accessToken');
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.organizationId = token.organizationId as string | null;
+        session.accessToken = token.accessToken as string; // ← EXPOR TOKEN NA SESSÃO
+        console.log('[NextAuth] Session populated:', {
+          userId: session.user.id,
+          hasAccessToken: !!session.accessToken,
+          accessTokenLength: session.accessToken?.length,
+        });
+      } else {
+        console.error('[NextAuth] Session callback missing data:', {
+          hasToken: !!token,
+          hasSessionUser: !!session.user,
+          tokenKeys: token ? Object.keys(token) : [],
+        });
       }
 
       return session;
