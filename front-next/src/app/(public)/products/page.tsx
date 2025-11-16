@@ -29,15 +29,17 @@ const ProductsPage = () => {
   const pageSize = 20;
 
   // Pegar filtros da URL
+  const search = searchParams.get('search') || undefined;
   const category = searchParams.get('category') || undefined;
   const priceMin = searchParams.get('price_min') ? parseFloat(searchParams.get('price_min')!) : undefined;
   const priceMax = searchParams.get('price_max') ? parseFloat(searchParams.get('price_max')!) : undefined;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page, category, priceMin, priceMax],
+    queryKey: ['products', page, search, category, priceMin, priceMax],
     queryFn: () => productsApi.getPublicProducts({
       page,
       pageSize,
+      search,
       category,
       priceMin,
       priceMax,
@@ -97,13 +99,22 @@ const ProductsPage = () => {
             ) : hasValidProducts(data) ? (
               <>
                 {/* Results Count */}
-                <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <p className="text-base text-muted-foreground">
-                    {data.meta.total} {data.meta.total === 1 ? 'produto encontrado' : 'produtos encontrados'}
-                  </p>
-                  <p className="text-base text-muted-foreground">
-                    Página {data.meta.page} de {data.meta.totalPages}
-                  </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-4 border-b border-border">
+                    <div className="space-y-1">
+                      <p className="text-lg font-semibold">
+                        {data.meta.total} {data.meta.total === 1 ? 'produto encontrado' : 'produtos encontrados'}
+                      </p>
+                      {search && (
+                        <p className="text-sm text-muted-foreground">
+                          Resultados para: <span className="font-medium text-foreground">"{search}"</span>
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Página {data.meta.page} de {data.meta.totalPages}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Products Grid */}
