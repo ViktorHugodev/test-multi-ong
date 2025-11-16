@@ -10,12 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
-import { authApi } from '@/lib/api/auth';
-import { useAuthStore } from '@/stores/auth-store';
 
 export function LoginForm() {
   const router = useRouter();
-  const { setTokens } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

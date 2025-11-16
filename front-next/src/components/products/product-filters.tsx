@@ -161,7 +161,6 @@ export function ProductFilters({ categories = [] }: ProductFiltersProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas as categorias</SelectItem>
-              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
