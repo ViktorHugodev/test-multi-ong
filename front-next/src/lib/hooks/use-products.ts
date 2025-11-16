@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productsApi } from '@/lib/api/products';
+import { createProductsApi } from '@/lib/api/products';
 import { ProductFilters } from '@/types/product.types';
 import { CreateProductDto, UpdateProductDto } from '@/lib/validations/product.schema';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import { useMemo } from 'react';
 
 // Query keys
 export const productKeys = {
@@ -16,30 +18,49 @@ export const productKeys = {
 
 // Hook para listar produtos da ONG
 export function useProducts(filters?: ProductFilters) {
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  // Criar API autenticada memoizada
+  const api = useMemo(() => createProductsApi(accessToken), [accessToken]);
+
   return useQuery({
     queryKey: productKeys.list(filters),
-    queryFn: () => productsApi.getMyProducts(filters),
+    queryFn: () => api.getMyProducts(filters),
     staleTime: 5 * 60 * 1000, // 5 minutos
+    enabled: !!accessToken, // Só executar se tiver token
   });
 }
 
 // Hook para obter um produto específico
 export function useProduct(id: string) {
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  const api = useMemo(() => createProductsApi(accessToken), [accessToken]);
+
   return useQuery({
     queryKey: productKeys.detail(id),
-    queryFn: () => productsApi.getMyProductById(id),
-    enabled: !!id,
+    queryFn: () => api.getMyProductById(id),
+    enabled: !!id && !!accessToken,
   });
 }
 
 // Hook para criar produto
 export function useCreateProduct() {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  const api = useMemo(() => createProductsApi(accessToken), [accessToken]);
 
   return useMutation({
     mutationFn: async (data: CreateProductDto) => {
+      if (!accessToken) {
+        throw new Error('Usuário não autenticado');
+      }
       try {
-        return await productsApi.createProduct(data);
+        return await api.createProduct(data);
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 400) {
@@ -68,11 +89,18 @@ export function useCreateProduct() {
 // Hook para atualizar produto
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  const api = useMemo(() => createProductsApi(accessToken), [accessToken]);
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateProductDto }) => {
+      if (!accessToken) {
+        throw new Error('Usuário não autenticado');
+      }
       try {
-        return await productsApi.updateProduct(id, data);
+        return await api.updateProduct(id, data);
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 400) {
@@ -102,11 +130,18 @@ export function useUpdateProduct() {
 // Hook para deletar produto
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  const api = useMemo(() => createProductsApi(accessToken), [accessToken]);
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!accessToken) {
+        throw new Error('Usuário não autenticado');
+      }
       try {
-        return await productsApi.deleteProduct(id);
+        return await api.deleteProduct(id);
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 404) {

@@ -7,8 +7,6 @@
 
 import type { NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
 
 // Configurações de tempo de expiração (em segundos)
 const SESSION_MAX_AGE = Number(process.env.SESSION_MAX_AGE) || 30 * 24 * 60 * 60; // Default: 30 days
@@ -55,64 +53,47 @@ export const authConfig = {
         const password = credentials.password as string;
 
         try {
-          // Buscar usuário no banco
-          console.log('[NextAuth] Searching user in database...');
-          const user = await prisma.user.findUnique({
-            where: {
-              email: email,
-            },
-            include: {
-              organization: {
-                select: {
-                  id: true,
-                  name: true,
-                  slug: true,
-                },
-              },
-            },
+          // ✅ CHAMAR BACKEND NESTJS PARA OBTER TOKEN JWT
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
+          console.log('[NextAuth] Calling backend API:', `${API_URL}/auth/login`);
+
+          const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
           });
 
-          console.log('[NextAuth] User found:', !!user);
+          console.log('[NextAuth] Backend response status:', response.status);
 
-          if (!user) {
-            console.log('[NextAuth] User not found');
-            throw new Error('Credenciais inválidas');
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.log('[NextAuth] Backend error:', errorData);
+
+            if (response.status === 401) {
+              throw new Error('Credenciais inválidas');
+            }
+            throw new Error(errorData.message || 'Erro de autenticação');
           }
 
-          // Verificar se usuário está ativo
-          if (!user.isActive) {
-            console.log('[NextAuth] User is not active');
-            throw new Error('Conta desativada');
+          const data = await response.json();
+          console.log('[NextAuth] Backend response data:', {
+            hasAccessToken: !!data.accessToken,
+            hasUser: !!data.user,
+            user: data.user?.email,
+          });
+
+          if (!data.accessToken || !data.user) {
+            throw new Error('Resposta inválida do servidor');
           }
 
-          // Verificar se tem hash de senha
-          if (!user.passwordHash) {
-            console.log('[NextAuth] User has no password hash');
-            throw new Error('Credenciais inválidas');
-          }
-
-          // Verificar senha com bcrypt
-          console.log('[NextAuth] Verifying password...');
-          const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-          console.log('[NextAuth] Password valid:', isPasswordValid);
-
-          if (!isPasswordValid) {
-            console.log('[NextAuth] Invalid password');
-            throw new Error('Credenciais inválidas');
-          }
-
-          console.log('[NextAuth] Authentication successful for:', user.email);
-
-          // Retornar objeto do usuário
-          // Este objeto será passado para o callback jwt()
+          // ✅ RETORNAR USER COM ACCESS TOKEN
           return {
-            id: user.id,
-            email: user.email,
-            name: user.fullName,
-            role: user.role,
-            organizationId: user.organizationId,
-            organization: user.organization,
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.fullName,
+            role: data.user.role,
+            organizationId: data.user.organizationId || null,
+            accessToken: data.accessToken, // ← TOKEN JWT DO BACKEND
           };
         } catch (error) {
           console.error('[NextAuth] Authorization error:', error);
@@ -136,7 +117,8 @@ export const authConfig = {
         token.id = user.id;
         token.role = user.role;
         token.organizationId = user.organizationId;
-        console.log('[NextAuth] Token populated with user data');
+        token.accessToken = user.accessToken; // ← SALVAR TOKEN JWT
+        console.log('[NextAuth] Token populated with user data and accessToken');
       }
 
       return token;
@@ -150,11 +132,8 @@ export const authConfig = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.organizationId = token.organizationId;
-        console.log('[NextAuth] Session populated:', {
-          id: session.user.id,
-          role: session.user.role,
-          organizationId: session.user.organizationId,
-        });
+        session.accessToken = token.accessToken; // ← EXPOR TOKEN NA SESSÃO
+        console.log('[NextAuth] Session populated with accessToken');
       }
 
       return session;

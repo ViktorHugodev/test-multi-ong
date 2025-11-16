@@ -1,8 +1,10 @@
-import axios, { AxiosError } from 'axios';
-import { useAuthStore } from '@/stores/auth-store';
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
+// ========================================
+// Cliente API Base (sem autenticação)
+// ========================================
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -10,62 +12,68 @@ export const apiClient = axios.create({
   },
 });
 
-// Request Interceptor: Adicionar token em todas as requisições
-apiClient.interceptors.request.use(
-  (config) => {
-    if (typeof window !== 'undefined') {
-      const { accessToken } = useAuthStore.getState();
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+// ========================================
+// Factory para criar cliente autenticado
+// ========================================
+export function createAuthenticatedClient(accessToken: string): AxiosInstance {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  // Response Interceptor: Log de erros
+  client.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+      console.error('[AuthenticatedClient] Request error:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        message: error.message,
+      });
+
+      // Se 401, o token pode ter expirado - NextAuth deve lidar com refresh
+      if (error.response?.status === 401) {
+        console.warn('[AuthenticatedClient] Token expired or invalid');
       }
+
+      return Promise.reject(error);
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  );
 
-// Response Interceptor: Refresh token automático
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+  return client;
+}
 
-    // Se erro 401 e não é retry
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+// ========================================
+// Helper para fazer requisições com token
+// ========================================
+export async function fetchWithAuth<T>(
+  accessToken: string,
+  url: string,
+  options: {
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    data?: unknown;
+    params?: Record<string, unknown>;
+  } = {}
+): Promise<T> {
+  const client = createAuthenticatedClient(accessToken);
+  const { method = 'GET', data, params } = options;
 
-      if (typeof window !== 'undefined') {
-        const { refreshToken, setTokens, clearAuth } = useAuthStore.getState();
+  const response = await client.request<T>({
+    url,
+    method,
+    data,
+    params,
+  });
 
-        // Se não houver refreshToken, apenas limpar estado local e propagar o erro
-        if (!refreshToken) {
-          clearAuth();
-          return Promise.reject(error);
-        }
+  return response.data;
+}
 
-        try {
-          // Tentar renovar o token
-          const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
-
-          setTokens(data.accessToken, data.refreshToken);
-
-          // Retry requisição original com novo token
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // Se refresh falhar, limpar estado local e propagar erro
-          clearAuth();
-          return Promise.reject(refreshError);
-        }
-      }
-    }
-
-    return Promise.reject(error);
-  }
-);
-
+// ========================================
+// Classe de erro customizada
+// ========================================
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -75,4 +83,18 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+// ========================================
+// Helper para extrair erro da resposta
+// ========================================
+export function getApiErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<{ message?: string }>;
+    return axiosError.response?.data?.message || axiosError.message || 'Erro na requisição';
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Erro desconhecido';
 }

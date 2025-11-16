@@ -9,6 +9,7 @@ declare module 'next-auth' {
       role: string;
       organizationId: string | null;
     };
+    accessToken: string; // JWT token from NestJS backend
   }
 
   interface User {
@@ -17,6 +18,7 @@ declare module 'next-auth' {
     name: string;
     role: string;
     organizationId: string | null;
+    accessToken: string; // JWT token from NestJS backend
   }
 }
 
@@ -25,5 +27,6 @@ declare module 'next-auth/jwt' {
     id: string;
     role: string;
     organizationId: string | null;
+    accessToken: string; // JWT token from NestJS backend
   }
 }
