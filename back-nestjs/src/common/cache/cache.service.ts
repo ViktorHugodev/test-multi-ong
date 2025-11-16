@@ -10,6 +10,20 @@ export interface CacheMetrics {
   errors: number;
 }
 
+export interface PersistentCacheMetrics {
+  hits: number;
+  misses: number;
+  ratio: number;
+  hitRate: string;
+  totalRequests: number;
+}
+
+// Redis keys for persistent metrics
+const REDIS_METRICS_KEYS = {
+  HITS: 'cache:metrics:hits',
+  MISSES: 'cache:metrics:misses',
+} as const;
+
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds
   prefix?: string;
@@ -287,6 +301,112 @@ export class CacheService implements OnModuleInit {
    */
   getClient(): Redis {
     return this.redis;
+  }
+
+  /**
+   * Wrap a function with caching (cache-aside pattern)
+   * If cache hit, returns cached value
+   * If cache miss, executes function, caches result, and returns it
+   */
+  async wrap<T>(
+    key: string,
+    fn: () => Promise<T>,
+    ttl?: number,
+  ): Promise<T> {
+    // Try to get from cache first
+    const cached = await this.get<T>(key);
+
+    if (cached !== null) {
+      await this.recordHit();
+      return cached;
+    }
+
+    // Cache miss - execute function
+    await this.recordMiss();
+    const result = await fn();
+
+    // Store result in cache
+    await this.set(key, result, { ttl });
+
+    return result;
+  }
+
+  /**
+   * Record a cache hit in persistent Redis storage
+   * Uses INCR for atomic operation
+   */
+  async recordHit(): Promise<void> {
+    try {
+      await this.redis.incr(REDIS_METRICS_KEYS.HITS);
+    } catch (error) {
+      this.logger.error('Failed to record cache hit:', error);
+    }
+  }
+
+  /**
+   * Record a cache miss in persistent Redis storage
+   * Uses INCR for atomic operation
+   */
+  async recordMiss(): Promise<void> {
+    try {
+      await this.redis.incr(REDIS_METRICS_KEYS.MISSES);
+    } catch (error) {
+      this.logger.error('Failed to record cache miss:', error);
+    }
+  }
+
+  /**
+   * Get persistent cache metrics from Redis
+   * These metrics survive application restarts
+   */
+  async getPersistentMetrics(): Promise<PersistentCacheMetrics> {
+    try {
+      const [hitsStr, missesStr] = await Promise.all([
+        this.redis.get(REDIS_METRICS_KEYS.HITS),
+        this.redis.get(REDIS_METRICS_KEYS.MISSES),
+      ]);
+
+      const hits = parseInt(hitsStr || '0', 10);
+      const misses = parseInt(missesStr || '0', 10);
+      const totalRequests = hits + misses;
+      const ratio = totalRequests > 0 ? hits / totalRequests : 0;
+      const hitRate =
+        totalRequests > 0
+          ? `${((hits / totalRequests) * 100).toFixed(2)}%`
+          : '0.00%';
+
+      return {
+        hits,
+        misses,
+        ratio,
+        hitRate,
+        totalRequests,
+      };
+    } catch (error) {
+      this.logger.error('Failed to get persistent metrics:', error);
+      return {
+        hits: 0,
+        misses: 0,
+        ratio: 0,
+        hitRate: '0.00%',
+        totalRequests: 0,
+      };
+    }
+  }
+
+  /**
+   * Reset persistent metrics in Redis
+   */
+  async resetPersistentMetrics(): Promise<void> {
+    try {
+      await Promise.all([
+        this.redis.set(REDIS_METRICS_KEYS.HITS, '0'),
+        this.redis.set(REDIS_METRICS_KEYS.MISSES, '0'),
+      ]);
+      this.logger.log('Persistent cache metrics reset');
+    } catch (error) {
+      this.logger.error('Failed to reset persistent metrics:', error);
+    }
   }
 
   /**
