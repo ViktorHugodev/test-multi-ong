@@ -31,10 +31,10 @@ const menuItems = [
   },
   {
     icon: BarChart3,
-    label: 'Analytics',
-    href: '/dashboard/analytics',
-    disabled: true,
-    badge: 'Em breve',
+    label: 'Catalogo',
+    href: '/dashboard/catalogo',
+    disabled: false,
+
   },
   {
     icon: Settings,

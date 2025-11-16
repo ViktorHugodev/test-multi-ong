@@ -105,12 +105,23 @@ export class TestSetupHelper {
     };
   }
 
-  async getAccessToken(email: string, password: string): Promise<string> {
+  async getAccessToken(user: TestUser | string, password?: string): Promise<string> {
     const request = require('supertest');
+
+    let email: string;
+    let pwd: string;
+
+    if (typeof user === 'string') {
+      email = user;
+      pwd = password || '';
+    } else {
+      email = user.email;
+      pwd = user.password;
+    }
 
     const response = await request(this.app.getHttpServer())
       .post('/api/auth/login')
-      .send({ email, password })
+      .send({ email, password: pwd })
       .expect(201);
 
     return response.body.accessToken;
