@@ -45,12 +45,60 @@ export class CacheController {
   @Get('metrics')
   @Public() // Allow public access to metrics for monitoring dashboards
   async getMetrics() {
-    const metrics = this.cacheService.getMetrics();
+    const [inMemoryMetrics, persistentMetrics] = await Promise.all([
+      this.cacheService.getMetrics(),
+      this.cacheService.getPersistentMetrics(),
+    ]);
 
     return {
       statusCode: HttpStatus.OK,
       message: 'Cache metrics retrieved successfully',
-      data: metrics,
+      data: {
+        inMemory: inMemoryMetrics,
+        persistent: persistentMetrics,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Get persistent metrics only (survive restarts)
+   *
+   * @returns Persistent cache metrics from Redis
+   */
+  @Get('metrics/persistent')
+  @Public()
+  async getPersistentMetrics() {
+    const metrics = await this.cacheService.getPersistentMetrics();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Persistent cache metrics retrieved successfully',
+      data: {
+        hits: metrics.hits,
+        misses: metrics.misses,
+        hitRatio: metrics.ratio,
+        hitRate: metrics.hitRate,
+        totalRequests: metrics.totalRequests,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Reset persistent metrics
+   *
+   * @returns Success confirmation
+   */
+  @Delete('metrics/reset')
+  @HttpCode(HttpStatus.OK)
+  async resetPersistentMetrics() {
+    await this.cacheService.resetPersistentMetrics();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Persistent cache metrics reset successfully',
+      timestamp: new Date().toISOString(),
     };
   }
 
