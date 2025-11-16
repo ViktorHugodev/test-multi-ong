@@ -110,8 +110,10 @@ model Order {
   updatedAt       DateTime    @updatedAt @map("updated_at")
   deletedAt       DateTime?   @map("deleted_at")
 
-  customer User        @relation(fields: [customerId], references: [id])
-  items    OrderItem[]
+  customer      User           @relation(fields: [customerId], references: [id])
+  items         OrderItem[]
+  payments      Payment[]
+  notifications Notification[]
 
   @@index([customerId])
   @@index([status])
@@ -163,4 +165,106 @@ model SearchLog {
 
   @@index([createdAt])
   @@map("search_logs")
+}
+
+// ============================================
+// ASYNC PROCESSING - PAYMENTS
+// ============================================
+
+enum PaymentStatus {
+  pending
+  processing
+  approved
+  failed
+  refunded
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @map("order_id")
+  amount          Decimal       @db.Decimal(10, 2)
+  status          PaymentStatus @default(pending)
+  gatewayResponse Json?         @map("gateway_response")
+  transactionId   String?       @unique @map("transaction_id")
+  processedAt     DateTime?     @map("processed_at")
+  attempts        Int           @default(0)
+  lastAttemptAt   DateTime?     @map("last_attempt_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ============================================
+// ASYNC PROCESSING - NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  order_created
+  payment_processing
+  payment_approved
+  payment_failed
+  order_confirmed
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  failed
+}
+
+model Notification {
+  id            String             @id @default(uuid())
+  orderId       String             @map("order_id")
+  type          NotificationType
+  recipient     String
+  status        NotificationStatus @default(pending)
+  message       String
+  metadata      Json?
+  sentAt        DateTime?          @map("sent_at")
+  attempts      Int                @default(0)
+  lastAttemptAt DateTime?          @map("last_attempt_at")
+  createdAt     DateTime           @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+  @@map("notifications")
+}
+
+// ============================================
+// ASYNC PROCESSING - JOB LOGS
+// ============================================
+
+enum JobStatus {
+  pending
+  processing
+  completed
+  failed
+  retrying
+}
+
+model JobLog {
+  id          String    @id @default(uuid())
+  jobId       String    @unique @map("job_id")
+  queue       String
+  jobType     String    @map("job_type")
+  payload     Json
+  status      JobStatus
+  result      Json?
+  error       String?
+  attempts    Int       @default(0)
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([queue, status])
+  @@index([jobType])
+  @@index([createdAt])
+  @@map("job_logs")
 }

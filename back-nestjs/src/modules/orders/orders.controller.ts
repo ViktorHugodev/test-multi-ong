@@ -43,6 +43,30 @@ export class OrdersController {
   ) {
     return this.ordersService.findOrderById(id, userId);
   }
+
+  /**
+   * Consultar status completo de processamento assíncrono
+   * Inclui: order, payments, notifications e histórico de jobs
+   */
+  @Get(':id/status')
+  async getOrderStatus(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.ordersService.getOrderProcessingStatus(id, userId);
+  }
+
+  /**
+   * Retentar pagamento manualmente
+   * Usado quando pagamento falha e cliente deseja tentar novamente
+   */
+  @Post(':id/retry-payment')
+  async retryPayment(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.ordersService.retryPayment(id, userId);
+  }
 }
 
 @Controller('organizations/:orgId/orders')
