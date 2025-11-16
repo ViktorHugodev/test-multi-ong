@@ -27,38 +27,35 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      // Primeiro, autentica via NextAuth para configurar a sessao/cookies
+      console.log('[LoginForm] Iniciando login com NextAuth...');
+      
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
+      console.log('[LoginForm] Resultado:', result);
+
       if (result?.error) {
+        console.error('[LoginForm] Erro:', result.error);
         setError('Email ou senha inválidos');
         toast.error('Erro no login', {
-          description: 'Email ou senha inválidos',
+          description: 'Verifique suas credenciais e tente novamente',
         });
         return;
       }
 
-      // Em seguida, autentica no backend NestJS para obter tokens JWT
-      try {
-        const loginResponse = await authApi.login(email, password);
-        setTokens(loginResponse.accessToken, loginResponse.refreshToken);
-      } catch (apiError) {
-        // Se falhar a obtencao de tokens, ainda assim o usuario esta logado via NextAuth,
-        // entao apenas registra o erro em log e segue com o fluxo de redirect.
-        console.error('Falha ao obter tokens do backend:', apiError);
+      if (result?.ok) {
+        console.log('[LoginForm] ✅ Login bem-sucedido!');
+        toast.success('Login realizado com sucesso!');
+        
+        // Redirecionar para dashboard
+        router.push('/dashboard');
+        router.refresh();
       }
-
-      toast.success('Login realizado com sucesso!', {
-        description: 'Redirecionando...',
-      });
-
-      router.push('/dashboard');
-      router.refresh();
     } catch (error) {
+      console.error('[LoginForm] Erro inesperado:', error);
       setError('Ocorreu um erro ao fazer login');
       toast.error('Erro no login', {
         description: 'Ocorreu um erro inesperado',
