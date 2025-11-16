@@ -1,4 +1,8 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 
@@ -19,5 +23,26 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     }
 
     return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    if (err) {
+      throw err;
+    }
+
+    // Quando o token está ausente ou inválido, o passport-jwt preenche `info`
+    if (!user) {
+      if (info?.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('JWT token expired');
+      }
+
+      if (info?.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid JWT token');
+      }
+
+      throw new UnauthorizedException('Missing or invalid authentication token');
+    }
+
+    return user;
   }
 }
