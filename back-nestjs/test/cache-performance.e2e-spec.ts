@@ -333,10 +333,27 @@ describe('Cache Performance Benchmarks (e2e)', () => {
         .get('/api/cache/metrics')
         .expect(200);
 
+      expect(response.body.data).toHaveProperty('inMemory');
+      expect(response.body.data).toHaveProperty('persistent');
+      expect(response.body.data.inMemory).toHaveProperty('hits');
+      expect(response.body.data.inMemory).toHaveProperty('misses');
+      expect(response.body.data.inMemory).toHaveProperty('hitRate');
+      expect(response.body.data.persistent).toHaveProperty('hits');
+      expect(response.body.data.persistent).toHaveProperty('misses');
+      expect(response.body.data.persistent).toHaveProperty('hitRatio');
+    });
+
+    it('should return persistent metrics only', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/cache/metrics/persistent')
+        .expect(200);
+
       expect(response.body.data).toHaveProperty('hits');
       expect(response.body.data).toHaveProperty('misses');
+      expect(response.body.data).toHaveProperty('hitRatio');
       expect(response.body.data).toHaveProperty('hitRate');
       expect(response.body.data).toHaveProperty('totalRequests');
+      expect(response.body).toHaveProperty('timestamp');
     });
 
     it('should return Redis info', async () => {
@@ -361,6 +378,147 @@ describe('Cache Performance Benchmarks (e2e)', () => {
       expect(response.body.data).toHaveProperty('status');
       expect(response.body.data.status).toBe('healthy');
       expect(response.body.data).toHaveProperty('latency');
+    });
+
+    it('should reset persistent metrics', async () => {
+      const org = await testHelper.createOrganization();
+      const user = await testHelper.createUser(org.id);
+      const token = await testHelper.getAccessToken(user);
+
+      // Reset metrics
+      const resetResponse = await request(app.getHttpServer())
+        .delete('/api/cache/metrics/reset')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(resetResponse.body.message).toContain('reset');
+
+      // Verify metrics are reset
+      const metricsResponse = await request(app.getHttpServer())
+        .get('/api/cache/metrics/persistent')
+        .expect(200);
+
+      expect(metricsResponse.body.data.hits).toBe(0);
+      expect(metricsResponse.body.data.misses).toBe(0);
+    });
+  });
+
+  describe('Persistent Metrics Tracking', () => {
+    it('should track hits and misses in Redis (survives restarts)', async () => {
+      const org = await testHelper.createOrganization();
+      const user = await testHelper.createUser(org.id);
+      const token = await testHelper.getAccessToken(user);
+
+      // Reset persistent metrics first
+      await request(app.getHttpServer())
+        .delete('/api/cache/metrics/reset')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      // Create test data
+      await testHelper.createProduct(org.id, {
+        name: 'Test Product',
+        price: 100,
+      });
+
+      // Clear cache to force misses
+      await cacheService.clear();
+
+      // Make requests to private endpoint (with @Cacheable decorator)
+      // First request = miss
+      await request(app.getHttpServer())
+        .get('/api/products')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      // Second request = hit
+      await request(app.getHttpServer())
+        .get('/api/products')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      // Third request = hit
+      await request(app.getHttpServer())
+        .get('/api/products')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      // Check persistent metrics
+      const metrics = await cacheService.getPersistentMetrics();
+
+      console.log('\n📊 Persistent Metrics:');
+      console.log(`   Hits:   ${metrics.hits}`);
+      console.log(`   Misses: ${metrics.misses}`);
+      console.log(`   Ratio:  ${metrics.ratio.toFixed(4)}`);
+      console.log(`   Rate:   ${metrics.hitRate}`);
+
+      // Should have at least 2 hits and 1 miss from our requests
+      // (other operations may add to these)
+      expect(metrics.hits).toBeGreaterThanOrEqual(2);
+      expect(metrics.misses).toBeGreaterThanOrEqual(1);
+      expect(metrics.ratio).toBeGreaterThan(0);
+    });
+
+    it('should correctly calculate hit ratio from persistent storage', async () => {
+      // Reset metrics
+      await cacheService.resetPersistentMetrics();
+
+      // Simulate cache operations
+      await cacheService.recordHit();
+      await cacheService.recordHit();
+      await cacheService.recordMiss();
+
+      const metrics = await cacheService.getPersistentMetrics();
+
+      expect(metrics.hits).toBe(2);
+      expect(metrics.misses).toBe(1);
+      expect(metrics.ratio).toBeCloseTo(0.666, 2);
+      expect(metrics.hitRate).toBe('66.67%');
+      expect(metrics.totalRequests).toBe(3);
+    });
+  });
+
+  describe('Multi-Tenancy Cache Isolation', () => {
+    it('should maintain separate cache per organization', async () => {
+      // Create two organizations
+      const org1 = await testHelper.createOrganization({ name: 'Org 1' });
+      const org2 = await testHelper.createOrganization({ name: 'Org 2' });
+
+      const user1 = await testHelper.createUser(org1.id);
+      const user2 = await testHelper.createUser(org2.id);
+
+      const token1 = await testHelper.getAccessToken(user1);
+      const token2 = await testHelper.getAccessToken(user2);
+
+      // Create different products for each org
+      await testHelper.createProduct(org1.id, { name: 'Org1 Product', price: 100 });
+      await testHelper.createProduct(org2.id, { name: 'Org2 Product', price: 200 });
+
+      // Clear cache
+      await cacheService.clear();
+
+      // Request from org1
+      const response1 = await request(app.getHttpServer())
+        .get('/api/products')
+        .set('Authorization', `Bearer ${token1}`)
+        .expect(200);
+
+      // Request from org2
+      const response2 = await request(app.getHttpServer())
+        .get('/api/products')
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(200);
+
+      // Verify different results (cache isolation)
+      expect(response1.body.items[0].name).toBe('Org1 Product');
+      expect(response2.body.items[0].name).toBe('Org2 Product');
+
+      // Both should have triggered cache misses (different org keys)
+      const stats = await cacheService.getCacheStats();
+      console.log('\n📊 Cache Keys by Prefix:', stats.keysByPrefix);
+
+      // Should have separate cache entries for each org
+      expect(stats.totalKeys).toBeGreaterThanOrEqual(2);
     });
   });
 });
