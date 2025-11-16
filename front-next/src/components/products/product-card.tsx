@@ -4,15 +4,21 @@ import { Package, ShoppingCart } from 'lucide-react';
 
 import { Product } from '@/types/product.types';
 import { formatCurrency } from '@/lib/utils/format-currency';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface IProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: IProductCardProps) {
+  const isLowStock = product.stockQty > 0 && product.stockQty < 5;
+  const isOutOfStock = product.stockQty === 0;
+
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="group bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
         {/* Product Image */}
         <div className="aspect-square relative bg-gray-100 overflow-hidden">
           {product.imageUrl ? (
@@ -28,50 +34,73 @@ export function ProductCard({ product }: IProductCardProps) {
               <Package className="h-16 w-16 text-gray-400" />
             </div>
           )}
-          
-          {/* NGO Badge */}
+
+          {/* NGO Badge - Top Left */}
           {product.organization && (
-            <div className="absolute bottom-3 left-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-sm text-xs font-medium text-gray-700 rounded-full border border-gray-200 shadow-sm">
-                <span className="material-symbols-outlined text-sm">
+            <div className="absolute top-3 left-3">
+              <Badge
+                variant="secondary"
+                className="bg-white/95 backdrop-blur-sm text-gray-700 border border-gray-200 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-xs mr-1">
                   volunteer_activism
                 </span>
                 {product.organization.name}
-              </span>
+              </Badge>
             </div>
           )}
-          
-          {/* Out of Stock Badge */}
-          {product.stockQty === 0 && (
-            <div className="absolute top-3 right-3">
-              <span className="px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-full">
-                Out of Stock
-              </span>
-            </div>
+
+          {/* Stock Status Badge - Top Right */}
+          {isOutOfStock && (
+            <Badge
+              variant="destructive"
+              className="absolute top-3 right-3"
+            >
+              Esgotado
+            </Badge>
+          )}
+          {isLowStock && !isOutOfStock && (
+            <Badge
+              variant="secondary"
+              className="absolute top-3 right-3 bg-orange-100 text-orange-700 border-orange-200"
+            >
+              Últimas unidades
+            </Badge>
           )}
         </div>
 
         {/* Product Info */}
-        <div className="p-4 space-y-3">
-          <div className="space-y-1">
-            <h3 className="font-semibold text-base text-gray-900 line-clamp-2 group-hover:text-primary transition-colors">
-              {product.name}
-            </h3>
-            <p className="text-sm text-gray-600 line-clamp-1">
-              {product.category}
-            </p>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <p className="text-lg font-bold text-gray-900">
+        <CardContent className="p-5 space-y-4">
+          {/* Category */}
+          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+            {product.category}
+          </p>
+
+          {/* Product Name */}
+          <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors leading-snug">
+            {product.name}
+          </h3>
+
+          {/* Price and Action */}
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <p className="text-2xl font-bold text-primary">
               {formatCurrency(product.price)}
             </p>
-            <button className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+            <Button
+              size="sm"
+              className="gap-2"
+              disabled={isOutOfStock}
+              onClick={(e) => {
+                e.preventDefault();
+                // Add to cart logic would go here
+              }}
+            >
               <ShoppingCart className="h-4 w-4" />
-            </button>
+              {isOutOfStock ? 'Indisponível' : 'Adicionar'}
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }
