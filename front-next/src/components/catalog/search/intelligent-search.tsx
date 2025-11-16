@@ -13,15 +13,8 @@ import { SearchFiltersComponent } from './search-filters';
 import { SearchResults } from './search-results';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
+import { Pagination } from '@/components/ui/pagination';
+
 
 export function IntelligentSearch() {
   const {
@@ -66,70 +59,14 @@ export function IntelligentSearch() {
   const renderPagination = () => {
     if (!meta || meta.totalPages <= 1) return null;
 
-    const pages: (number | 'ellipsis')[] = [];
-    const maxVisible = 5;
-
-    if (meta.totalPages <= maxVisible) {
-      for (let i = 1; i <= meta.totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (page <= 3) {
-        pages.push(1, 2, 3, 4, 'ellipsis', meta.totalPages);
-      } else if (page >= meta.totalPages - 2) {
-        pages.push(
-          1,
-          'ellipsis',
-          meta.totalPages - 3,
-          meta.totalPages - 2,
-          meta.totalPages - 1,
-          meta.totalPages
-        );
-      } else {
-        pages.push(1, 'ellipsis', page - 1, page, page + 1, 'ellipsis', meta.totalPages);
-      }
-    }
-
     return (
-      <Pagination className="mt-8">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => prevPage()}
-              className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-              aria-disabled={page === 1}
-            />
-          </PaginationItem>
-
-          {pages.map((pageNum, index) =>
-            pageNum === 'ellipsis' ? (
-              <PaginationItem key={`ellipsis-${index}`}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            ) : (
-              <PaginationItem key={pageNum}>
-                <PaginationLink
-                  onClick={() => goToPage(pageNum)}
-                  isActive={pageNum === page}
-                  className="cursor-pointer"
-                >
-                  {pageNum}
-                </PaginationLink>
-              </PaginationItem>
-            )
-          )}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => nextPage()}
-              className={
-                page === meta.totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'
-              }
-              aria-disabled={page === meta.totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <Pagination
+        currentPage={page}
+        totalPages={meta.totalPages}
+        totalItems={meta.total}
+        pageSize={meta.pageSize}
+        onPageChange={goToPage}
+      />
     );
   };
 
