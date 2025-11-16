@@ -37,9 +37,9 @@ export default function OrganizationsPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
         {organizations?.map((org: any) => (
-          <Card key={org.id} className="hover:shadow-lg transition-shadow">
+          <Card key={org.id} className="hover:shadow-lg transition-shadow p-2">
             <CardHeader>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -55,7 +55,7 @@ export default function OrganizationsPage() {
             </CardHeader>
             <CardContent>
               {org.description && (
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2 ">
                   {org.description}
                 </p>
               )}
