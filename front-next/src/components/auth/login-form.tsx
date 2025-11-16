@@ -24,27 +24,35 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
+      console.log('[LoginForm] Iniciando login com NextAuth...');
+      
       const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
+      console.log('[LoginForm] Resultado:', result);
+
       if (result?.error) {
+        console.error('[LoginForm] Erro:', result.error);
         setError('Email ou senha inválidos');
         toast.error('Erro no login', {
-          description: 'Email ou senha inválidos',
+          description: 'Verifique suas credenciais e tente novamente',
         });
         return;
       }
 
-      toast.success('Login realizado com sucesso!', {
-        description: 'Redirecionando...',
-      });
-
-      router.push('/dashboard');
-      router.refresh();
+      if (result?.ok) {
+        console.log('[LoginForm] ✅ Login bem-sucedido!');
+        toast.success('Login realizado com sucesso!');
+        
+        // Redirecionar para dashboard
+        router.push('/dashboard');
+        router.refresh();
+      }
     } catch (error) {
+      console.error('[LoginForm] Erro inesperado:', error);
       setError('Ocorreu um erro ao fazer login');
       toast.error('Erro no login', {
         description: 'Ocorreu um erro inesperado',
