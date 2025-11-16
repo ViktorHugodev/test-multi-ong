@@ -233,6 +233,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       expiresIn: '7d',
+      expiresIn: '7d',
     };
   }
 

@@ -65,9 +65,18 @@ export function LoginForm() {
         return;
       }
 
-      // Login bem-sucedido
-      if (result?.ok) {
-        console.log('[LoginForm] Login successful, redirecting to:', callbackUrl);
+      // Em seguida, autentica no backend NestJS para obter tokens JWT
+      try {
+        const loginResponse = await authApi.login(email, password);
+        setTokens(loginResponse.accessToken, loginResponse.refreshToken);
+        console.log('[LoginForm] Tokens obtidos e salvos com sucesso');
+      } catch (apiError) {
+        // CRÍTICO: Se falhar a obtenção de tokens, o usuário não poderá acessar rotas protegidas
+        console.error('[LoginForm] ERRO CRÍTICO ao obter tokens do backend:', apiError);
+        toast.error('Aviso', {
+          description: 'Login parcial: algumas funcionalidades podem não funcionar.',
+        });
+      }
 
         toast.success('Login realizado com sucesso!', {
           description: 'Redirecionando...',
