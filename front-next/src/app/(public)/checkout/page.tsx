@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useCart } from '@/lib/hooks/use-cart';
 import { useAuth } from '@/lib/hooks/use-auth';
-import { ordersApi } from '@/lib/api/orders';
+import { createOrdersApi } from '@/lib/api/orders';
+import { useSession } from 'next-auth/react';
 import { checkoutSchema, CheckoutFormData } from '@/lib/validations/checkout.schema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +26,12 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCart();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
   const [mounted, setMounted] = useState(false);
+
+  // Criar API autenticada com token da sessão
+  const ordersApi = useMemo(() => createOrdersApi(accessToken), [accessToken]);
 
   useEffect(() => {
     setMounted(true);

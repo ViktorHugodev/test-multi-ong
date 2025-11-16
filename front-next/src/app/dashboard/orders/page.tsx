@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ordersApi } from '@/lib/api/orders';
+import { createOrdersApi } from '@/lib/api/orders';
+import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,11 @@ import { useAuthNextAuth } from '@/lib/hooks/use-auth-nextauth';
 export default function MyOrdersPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthNextAuth();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
+
+  // Criar API autenticada com token da sessão
+  const ordersApi = useMemo(() => createOrdersApi(accessToken), [accessToken]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -26,7 +32,7 @@ export default function MyOrdersPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['my-orders'],
     queryFn: () => ordersApi.getMyOrders(1, 50),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !!accessToken,
   });
 
   const getStatusBadge = (status: string) => {

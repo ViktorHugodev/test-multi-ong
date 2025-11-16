@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ordersApi } from '@/lib/api/orders';
+import { createOrdersApi } from '@/lib/api/orders';
+import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,12 @@ export default function OrderSuccessPage() {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthNextAuth();
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
   const orderId = params.orderId as string;
+
+  // Criar API autenticada com token da sessão
+  const ordersApi = useMemo(() => createOrdersApi(accessToken), [accessToken]);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -29,7 +35,7 @@ export default function OrderSuccessPage() {
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['order', orderId],
     queryFn: () => ordersApi.getOrderById(orderId),
-    enabled: !!orderId && isAuthenticated,
+    enabled: !!orderId && isAuthenticated && !!accessToken,
   });
 
   if (authLoading || isLoading) {

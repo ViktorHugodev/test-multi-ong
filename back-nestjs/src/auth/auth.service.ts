@@ -218,21 +218,21 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET || 'default-secret-change-in-production',
-        expiresIn: '15m', // Token de acesso curto
+        expiresIn: '7d', // Token de acesso válido por 7 dias
       }),
       this.jwtService.signAsync(payload, {
         secret:
           process.env.JWT_REFRESH_SECRET ||
           process.env.JWT_SECRET ||
           'default-secret-change-in-production',
-        expiresIn: '7d', // Refresh token longo
+        expiresIn: '30d', // Refresh token válido por 30 dias
       }),
     ]);
 
     return {
       accessToken,
       refreshToken,
-      expiresIn: '15m',
+      expiresIn: '7d',
     };
   }
 
