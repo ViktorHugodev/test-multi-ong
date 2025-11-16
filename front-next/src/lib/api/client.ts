@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { useAuthStore } from '@/stores/auth-store';
+import { getSession } from 'next-auth/react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333/api';
 
@@ -8,15 +8,27 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Importante para enviar cookies
 });
 
-// Request Interceptor: Adicionar token em todas as requisições
+// Request Interceptor: Adicionar informações da sessão NextAuth
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
     if (typeof window !== 'undefined') {
-      const { accessToken } = useAuthStore.getState();
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+      try {
+        const session = await getSession();
+        if (session?.user) {
+          // Adicionar informações do usuário nos headers
+          // O backend pode usar isso para validação
+          config.headers['x-user-id'] = (session.user as any).id || '';
+          config.headers['x-user-email'] = session.user.email || '';
+          
+          console.log(`[ApiClient] Request para ${config.url} com sessão ativa (${session.user.email})`);
+        } else {
+          console.warn(`[ApiClient] Request para ${config.url} SEM SESSÃO`);
+        }
+      } catch (error) {
+        console.error('[ApiClient] Erro ao obter sessão:', error);
       }
     }
     return config;
@@ -24,7 +36,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Refresh token automático
+// Response Interceptor: Tratar erro 401
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -32,33 +44,21 @@ apiClient.interceptors.response.use(
 
     // Se erro 401 e não é retry
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.warn('[ApiClient] Erro 401 detectado:', {
+        url: originalRequest.url,
+        message: (error.response?.data as any)?.message,
+      });
+      
       originalRequest._retry = true;
 
       if (typeof window !== 'undefined') {
-        const { refreshToken, setTokens, clearAuth } = useAuthStore.getState();
-
-        // Se não houver refreshToken, apenas limpar estado local e propagar o erro
-        if (!refreshToken) {
-          clearAuth();
-          return Promise.reject(error);
-        }
-
-        try {
-          // Tentar renovar o token
-          const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
-          });
-
-          setTokens(data.accessToken, data.refreshToken);
-
-          // Retry requisição original com novo token
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          // Se refresh falhar, limpar estado local e propagar erro
-          clearAuth();
-          return Promise.reject(refreshError);
-        }
+        // Com NextAuth, redirecionar para login
+        console.error('[ApiClient] Sessão expirada, redirecionando para login');
+        
+        // Redirecionar para página de login
+        window.location.href = '/login?callbackUrl=' + encodeURIComponent(window.location.pathname);
+        
+        return Promise.reject(error);
       }
     }
 

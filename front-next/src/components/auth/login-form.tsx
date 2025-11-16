@@ -46,10 +46,13 @@ export function LoginForm() {
       try {
         const loginResponse = await authApi.login(email, password);
         setTokens(loginResponse.accessToken, loginResponse.refreshToken);
+        console.log('[LoginForm] Tokens obtidos e salvos com sucesso');
       } catch (apiError) {
-        // Se falhar a obtencao de tokens, ainda assim o usuario esta logado via NextAuth,
-        // entao apenas registra o erro em log e segue com o fluxo de redirect.
-        console.error('Falha ao obter tokens do backend:', apiError);
+        // CRÍTICO: Se falhar a obtenção de tokens, o usuário não poderá acessar rotas protegidas
+        console.error('[LoginForm] ERRO CRÍTICO ao obter tokens do backend:', apiError);
+        toast.error('Aviso', {
+          description: 'Login parcial: algumas funcionalidades podem não funcionar.',
+        });
       }
 
       toast.success('Login realizado com sucesso!', {

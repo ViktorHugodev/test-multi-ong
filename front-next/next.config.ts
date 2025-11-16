@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Permitir dominios remotos realmente usados pelas imagens dos produtos
-    domains: ['loremflickr.com', 'example.com'],
+    // Desabilitar otimização para evitar timeouts com serviços externos instáveis
+    unoptimized: true,
   },
 };
 
