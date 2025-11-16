@@ -29,8 +29,8 @@ export function MetricCard({
       alert && "border-orange-200 bg-orange-50/50"
     )}>
       <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-3 flex-1">
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className={cn(
               "text-3xl font-bold tracking-tight",
@@ -39,11 +39,11 @@ export function MetricCard({
               {value}
             </p>
             {description && (
-              <p className="text-xs text-gray-500">{description}</p>
+              <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
             )}
           </div>
           <div className={cn(
-            "rounded-lg p-3",
+            "rounded-lg p-3 flex-shrink-0",
             alert ? "bg-orange-100" : "bg-gray-100"
           )}>
             <Icon className={cn(
@@ -54,10 +54,10 @@ export function MetricCard({
         </div>
 
         {change && trend && (
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
             <div
               className={cn(
-                "flex items-center gap-1 text-sm font-medium rounded-full px-2 py-0.5",
+                "flex items-center gap-1 text-sm font-medium rounded-full px-2.5 py-1",
                 trend === 'up'
                   ? "text-green-700 bg-green-100"
                   : "text-red-700 bg-red-100"
