@@ -6,9 +6,14 @@ import { OrdersRepository } from './orders.repository';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'payment',
-    }),
+    BullModule.registerQueue(
+      {
+        name: 'payment-processing',
+      },
+      {
+        name: 'notifications',
+      },
+    ),
   ],
   controllers: [OrdersController, OrganizationOrdersController],
   providers: [OrdersService, OrdersRepository],

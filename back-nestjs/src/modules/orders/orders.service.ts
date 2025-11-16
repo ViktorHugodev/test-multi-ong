@@ -22,7 +22,8 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly repository: OrdersRepository,
-    @InjectQueue('payment') private paymentQueue: Queue,
+    @InjectQueue('payment-processing') private paymentQueue: Queue,
+    @InjectQueue('notifications') private notificationQueue: Queue,
   ) {}
 
   async createOrder(userId: string, dto: CreateOrderDto) {
@@ -152,20 +153,14 @@ export class OrdersService {
         timeout: 10000,
       },
     ).then(async (order) => {
-      // ENQUEUE ASYNC PAYMENT JOB (não bloqueia resposta)
-      await this.paymentQueue.add(
-        'process-payment',
-        { orderId: order.id },
-        {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-        },
-      );
+      // DISPATCH ASYNC JOBS (não bloqueia resposta)
+      await this.dispatchAsyncJobs(order);
 
-      return order;
+      return {
+        ...order,
+        message: 'Pedido criado com sucesso. Processamento em andamento.',
+        estimatedProcessingTime: '2-5 segundos',
+      };
     });
   }
 
@@ -200,7 +195,184 @@ export class OrdersService {
     );
   }
 
-  // Usado pelo PaymentProcessor
+  /**
+   * Dispara jobs assíncronos após criação do pedido
+   * - Payment processing
+   * - Order created notification
+   */
+  private async dispatchAsyncJobs(order: any) {
+    const idempotencyKey = `order:${order.id}`;
+
+    try {
+      // 1. Job de processamento de pagamento
+      await this.paymentQueue.add(
+        'process-payment',
+        {
+          orderId: order.id,
+          amount: Number(order.totalAmount),
+          orderNumber: order.orderNumber,
+          idempotencyKey: `${idempotencyKey}:payment`,
+        },
+        {
+          attempts: 5,
+          backoff: {
+            type: 'exponential',
+            delay: 2000,
+          },
+        },
+      );
+
+      this.logger.log(`Payment job enqueued for order ${order.id}`);
+
+      // 2. Job de notificação de pedido criado
+      const customer = await this.prisma.user.findUnique({
+        where: { id: order.customerId },
+        select: { email: true },
+      });
+
+      await this.notificationQueue.add(
+        'send-notification',
+        {
+          orderId: order.id,
+          type: 'order_created',
+          recipient: customer?.email || 'customer@example.com',
+          orderNumber: order.orderNumber,
+          amount: Number(order.totalAmount),
+          idempotencyKey: `${idempotencyKey}:notification:order_created`,
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 1000,
+          },
+        },
+      );
+
+      this.logger.log(`Order created notification job enqueued for order ${order.id}`);
+    } catch (error) {
+      this.logger.error(
+        `Error enqueuing async jobs for order ${order.id}:`,
+        error.message,
+      );
+      // Não bloquear a criação do pedido se enfileiramento falhar
+    }
+  }
+
+  /**
+   * Busca status completo de processamento assíncrono do pedido
+   */
+  async getOrderProcessingStatus(orderId: string, userId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                imageUrl: true,
+              },
+            },
+          },
+        },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
+        notifications: {
+          orderBy: { createdAt: 'desc' },
+        },
+        customer: {
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Verificar se usuário é dono do pedido
+    if (order.customerId !== userId) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
+
+  /**
+   * Retentar pagamento manualmente
+   */
+  async retryPayment(orderId: string, userId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Verificar se usuário é dono do pedido
+    if (order.customerId !== userId) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Verificar se pedido pode ser retentado
+    if (order.status === 'confirmed') {
+      throw new BadRequestException('Order is already confirmed');
+    }
+
+    if (order.status === 'cancelled') {
+      throw new BadRequestException('Order is cancelled');
+    }
+
+    // Atualizar status para payment_processing
+    await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'payment_processing' },
+    });
+
+    // Enfileirar novo job de pagamento
+    await this.paymentQueue.add(
+      'process-payment',
+      {
+        orderId: order.id,
+        amount: Number(order.totalAmount),
+        orderNumber: order.orderNumber,
+        customerEmail: order.customer.email,
+        idempotencyKey: `order:${order.id}:payment:retry:${Date.now()}`,
+      },
+      {
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+      },
+    );
+
+    this.logger.log(`Payment retry job enqueued for order ${orderId}`);
+
+    return {
+      message: 'Retry de pagamento iniciado',
+      orderId,
+      status: 'payment_processing',
+    };
+  }
+
+  // Métodos auxiliares mantidos para compatibilidade
   async confirmPayment(orderId: string, transactionData: any) {
     return this.prisma.order.update({
       where: { id: orderId },
