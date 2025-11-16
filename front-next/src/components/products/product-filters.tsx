@@ -27,7 +27,8 @@ export function ProductFilters({ categories = [] }: ProductFiltersProps) {
   const searchParams = useSearchParams();
 
   // Estados locais para os filtros
-  const [category, setCategory] = useState(searchParams.get('category') || '');
+  // Usamos 'all' como valor sentinela para "todas as categorias" para evitar value vazio no Select
+  const [category, setCategory] = useState(searchParams.get('category') || 'all');
   const [priceMin, setPriceMin] = useState(searchParams.get('price_min') || '');
   const [priceMax, setPriceMax] = useState(searchParams.get('price_max') || '');
 
@@ -35,7 +36,7 @@ export function ProductFilters({ categories = [] }: ProductFiltersProps) {
   const handleApplyFilters = () => {
     const params = new URLSearchParams();
 
-    if (category) params.set('category', category);
+    if (category && category !== 'all') params.set('category', category);
     if (priceMin) params.set('price_min', priceMin);
     if (priceMax) params.set('price_max', priceMax);
 
@@ -44,7 +45,7 @@ export function ProductFilters({ categories = [] }: ProductFiltersProps) {
 
   // Limpar filtros
   const handleClearFilters = () => {
-    setCategory('');
+    setCategory('all');
     setPriceMin('');
     setPriceMax('');
     router.push('/products');
@@ -80,7 +81,7 @@ export function ProductFilters({ categories = [] }: ProductFiltersProps) {
               <SelectValue placeholder="Todas as categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas as categorias</SelectItem>
+              <SelectItem value="all">Todas as categorias</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
