@@ -49,6 +49,11 @@ export const searchApi = {
     // Construir query string com filtros
     let enhancedQuery = query;
 
+    // Adicionar keyword aos filtros se fornecido
+    if (filters.keyword && filters.keyword.trim().length > 0) {
+      enhancedQuery += ` ${filters.keyword.trim()}`;
+    }
+
     if (filters.category) {
       enhancedQuery += ` categoria:${filters.category}`;
     }
@@ -63,10 +68,9 @@ export const searchApi = {
 
     try {
       const response = await apiClient.post<SearchResponse>(
-        '/public/search',
-        { query: enhancedQuery },
+        '/search',
+        { query: enhancedQuery, page, pageSize },
         {
-          params: { page, pageSize },
           timeout: 30000, // 30 segundos
         }
       );

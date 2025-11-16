@@ -152,7 +152,8 @@ export function useIntelligentSearch(options: UseIntelligentSearchOptions = {}) 
     return !!(
       state.filters.category ||
       state.filters.priceMin !== undefined ||
-      state.filters.priceMax !== undefined
+      state.filters.priceMax !== undefined ||
+      (state.filters.keyword && state.filters.keyword.trim().length > 0)
     );
   }, [state.filters]);
 

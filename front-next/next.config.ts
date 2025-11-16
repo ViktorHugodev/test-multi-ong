@@ -2,16 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-    ],
+    // Permitir dominios remotos realmente usados pelas imagens dos produtos
+    domains: ['loremflickr.com', 'example.com'],
   },
 };
 

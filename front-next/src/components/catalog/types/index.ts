@@ -25,6 +25,8 @@ export interface SearchFilters {
   category?: string;
   priceMin?: number;
   priceMax?: number;
+  /** Texto livre de palavras-chave para complementar a query principal */
+  keyword?: string;
 }
 
 export interface SearchState {

@@ -37,9 +37,9 @@ apiClient.interceptors.response.use(
       if (typeof window !== 'undefined') {
         const { refreshToken, setTokens, clearAuth } = useAuthStore.getState();
 
+        // Se não houver refreshToken, apenas limpar estado local e propagar o erro
         if (!refreshToken) {
           clearAuth();
-          window.location.href = '/login';
           return Promise.reject(error);
         }
 
@@ -55,9 +55,8 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
           return apiClient(originalRequest);
         } catch (refreshError) {
-          // Se refresh falhar, fazer logout
+          // Se refresh falhar, limpar estado local e propagar erro
           clearAuth();
-          window.location.href = '/login';
           return Promise.reject(refreshError);
         }
       }

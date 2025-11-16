@@ -24,11 +24,3 @@ export const metadata: Metadata = {
 export default function CatalogoPage() {
   return <IntelligentSearch />;
 }
-
-// ========================================
-// Notas de Implementação:
-// - Metadata otimizada para SEO
-// - Página simples que renderiza o componente principal
-// - Client-side rendering via 'use client' no componente
-// - Rota: /catalogo
-// ========================================

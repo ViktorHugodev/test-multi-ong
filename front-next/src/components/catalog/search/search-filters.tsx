@@ -80,13 +80,48 @@ export function SearchFiltersComponent({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Filter className="h-5 w-5" />
-          Filtros Manuais
-        </CardTitle>
+      <CardHeader className="space-y-1">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Filter className="h-5 w-5" />
+            Filtros
+          </CardTitle>
+          {hasActiveFilters && (
+            <Button
+              onClick={handleClear}
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs"
+              aria-label="Limpar todos os filtros"
+            >
+              Limpar
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Campo de Pesquisa por Texto */}
+        <div className="space-y-2">
+          <Label htmlFor="keyword" className="text-sm font-semibold">
+            Pesquisar por texto
+          </Label>
+          <Input
+            id="keyword"
+            type="text"
+            placeholder="Digite para buscar..."
+            value={localFilters.keyword ?? ''}
+            onChange={(e) =>
+              setLocalFilters({
+                ...localFilters,
+                keyword: e.target.value || undefined,
+              })
+            }
+            className="h-10"
+          />
+          <p className="text-xs text-muted-foreground">
+            Busca por nome ou descrição do produto
+          </p>
+        </div>
         {/* Categoria */}
         <div className="space-y-2">
           <Label htmlFor="category">Categoria</Label>
@@ -110,36 +145,30 @@ export function SearchFiltersComponent({
 
         {/* Faixa de Preço */}
         <div className="space-y-2">
-          <Label>Faixa de Preço</Label>
+          <Label className="text-sm font-semibold">Faixa de Preço (R$)</Label>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="priceMin" className="text-xs text-gray-600">
-                Mínimo (R$)
-              </Label>
-              <Input
-                id="priceMin"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0,00"
-                value={localFilters.priceMin ?? ''}
-                onChange={(e) => handlePriceMinChange(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="priceMax" className="text-xs text-gray-600">
-                Máximo (R$)
-              </Label>
-              <Input
-                id="priceMax"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="999,99"
-                value={localFilters.priceMax ?? ''}
-                onChange={(e) => handlePriceMaxChange(e.target.value)}
-              />
-            </div>
+            <Input
+              id="priceMin"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Mín"
+              value={localFilters.priceMin ?? ''}
+              onChange={(e) => handlePriceMinChange(e.target.value)}
+              className="h-10"
+              aria-label="Preço mínimo"
+            />
+            <Input
+              id="priceMax"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Máx"
+              value={localFilters.priceMax ?? ''}
+              onChange={(e) => handlePriceMaxChange(e.target.value)}
+              className="h-10"
+              aria-label="Preço máximo"
+            />
           </div>
           {!isValid && (
             <p className="text-xs text-red-600">
@@ -148,27 +177,16 @@ export function SearchFiltersComponent({
           )}
         </div>
 
-        {/* Botões de Ação */}
-        <div className="flex gap-2 pt-2">
-          <Button
-            onClick={handleApply}
-            disabled={!isValid}
-            className="flex-1"
-            aria-label="Aplicar filtros"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Aplicar
-          </Button>
-          <Button
-            onClick={handleClear}
-            variant="outline"
-            disabled={!hasActiveFilters}
-            aria-label="Limpar filtros"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Limpar
-          </Button>
-        </div>
+        {/* Botão de Aplicar */}
+        <Button
+          onClick={handleApply}
+          disabled={!isValid}
+          className="w-full h-11"
+          size="lg"
+          aria-label="Aplicar filtros"
+        >
+          Aplicar Filtros
+        </Button>
 
         {/* Indicador de Filtros Ativos */}
         {hasActiveFilters && (
@@ -188,6 +206,11 @@ export function SearchFiltersComponent({
               {localFilters.priceMax !== undefined && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
                   Max: R$ {localFilters.priceMax.toFixed(2)}
+                </span>
+              )}
+              {localFilters.keyword && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                  "{localFilters.keyword}"
                 </span>
               )}
             </div>

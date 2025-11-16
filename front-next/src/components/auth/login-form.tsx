@@ -10,9 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
+import { authApi } from '@/lib/api/auth';
+import { useAuthStore } from '@/stores/auth-store';
 
 export function LoginForm() {
   const router = useRouter();
+  const { setTokens } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,6 +27,7 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
+      // Primeiro, autentica via NextAuth para configurar a sessao/cookies
       const result = await signIn('credentials', {
         email,
         password,
@@ -36,6 +40,16 @@ export function LoginForm() {
           description: 'Email ou senha inválidos',
         });
         return;
+      }
+
+      // Em seguida, autentica no backend NestJS para obter tokens JWT
+      try {
+        const loginResponse = await authApi.login(email, password);
+        setTokens(loginResponse.accessToken, loginResponse.refreshToken);
+      } catch (apiError) {
+        // Se falhar a obtencao de tokens, ainda assim o usuario esta logado via NextAuth,
+        // entao apenas registra o erro em log e segue com o fluxo de redirect.
+        console.error('Falha ao obter tokens do backend:', apiError);
       }
 
       toast.success('Login realizado com sucesso!', {
