@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 
@@ -12,18 +12,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PaginatedResponse, Product } from '@/types/product.types';
 
 // Helper function to check if data has valid structure
-const hasValidProducts = (data: any): data is PaginatedResponse<Product> => {
+const hasValidProducts = (data: unknown): data is PaginatedResponse<Product> => {
   return Boolean(
     data &&
     typeof data === 'object' &&
-    Array.isArray(data.items) &&
-    data.items.length > 0 &&
-    data.meta &&
-    typeof data.meta === 'object'
+    'items' in data &&
+    Array.isArray((data as { items: unknown }).items) &&
+    (data as { items: unknown[] }).items.length > 0 &&
+    'meta' in data &&
+    typeof (data as { meta: unknown }).meta === 'object'
   );
 };
 
-const ProductsPage = () => {
+const ProductsPageContent = () => {
   const searchParams = useSearchParams();
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -107,7 +108,7 @@ const ProductsPage = () => {
                       </p>
                       {search && (
                         <p className="text-sm text-muted-foreground">
-                          Resultados para: <span className="font-medium text-foreground">"{search}"</span>
+                          Resultados para: <span className="font-medium text-foreground">&quot;{search}&quot;</span>
                         </p>
                       )}
                     </div>
@@ -148,6 +149,36 @@ const ProductsPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const ProductsPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="bg-background-light dark:bg-background min-h-screen">
+        <div className="container mx-auto px-6 md:px-8 py-12">
+          <div className="mb-12 space-y-3">
+            <h1 className="text-5xl md:text-6xl font-bold font-display leading-tight">
+              Produtos
+            </h1>
+            <p className="text-muted-foreground text-xl leading-relaxed">
+              Explore todos os produtos disponíveis de nossas ONGs parceiras
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="space-y-4">
+                <Skeleton className="aspect-square w-full rounded-lg" />
+                <Skeleton className="h-6 w-3/4 rounded-lg" />
+                <Skeleton className="h-6 w-1/2 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 };
 

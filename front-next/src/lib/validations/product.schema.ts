@@ -37,7 +37,7 @@ export const createProductSchema = z.object({
     .string()
     .max(50, 'SKU deve ter no máximo 50 caracteres')
     .optional(),
-  isActive: z.boolean().optional().default(true),
+  isActive: z.boolean().default(true).transform((val) => val ?? true),
 });
 
 // Schema de validação para atualização de produto

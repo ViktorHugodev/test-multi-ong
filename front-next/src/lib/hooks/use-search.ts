@@ -5,7 +5,7 @@ import { useDebounce } from './use-debounce';
 
 export interface SearchMetadata {
   searchMethod: 'llm' | 'fallback';
-  appliedFilters: any;
+  appliedFilters: Record<string, unknown>;
   interpretation: string;
   latency: number;
   aiSuccess: boolean;
@@ -20,7 +20,7 @@ export interface Pagination {
 }
 
 export interface SearchResponse {
-  results: any[];
+  results: unknown[];
   meta: Pagination & {
     aiSuccess: boolean;
     fallbackUsed: boolean;
@@ -31,7 +31,7 @@ export interface SearchResponse {
 
 export function useSearch(initialQuery = '', initialPage = 1, initialPageSize = 20) {
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<unknown[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: initialPage,
     pageSize: initialPageSize,
@@ -92,8 +92,9 @@ export function useSearch(initialQuery = '', initialPage = 1, initialPageSize = 
           aiSuccess: data.meta.aiSuccess,
           fallbackUsed: data.meta.fallbackUsed,
         });
-      } catch (err: any) {
-        setError(err.message || 'Erro ao buscar produtos');
+      } catch (err: unknown) {
+        const error = err as { message?: string };
+        setError(error.message || 'Erro ao buscar produtos');
         setResults([]);
       } finally {
         setIsLoading(false);
@@ -104,6 +105,7 @@ export function useSearch(initialQuery = '', initialPage = 1, initialPageSize = 
 
   useEffect(() => {
     performSearch(debouncedQuery, pagination.page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 
   const retry = useCallback(() => {

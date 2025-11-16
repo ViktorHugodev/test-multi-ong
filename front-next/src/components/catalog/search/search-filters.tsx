@@ -210,7 +210,7 @@ export function SearchFiltersComponent({
               )}
               {localFilters.keyword && (
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
-                  "{localFilters.keyword}"
+                  &quot;{localFilters.keyword}&quot;
                 </span>
               )}
             </div>

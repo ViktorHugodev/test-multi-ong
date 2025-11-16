@@ -14,7 +14,7 @@ export interface StockError {
 
 interface CheckoutData {
   paymentMethod: string;
-  shippingDetails?: any;
+  shippingDetails?: Record<string, unknown>;
 }
 
 export function useCheckout() {
@@ -75,7 +75,7 @@ export function useCheckout() {
       clearCart();
       toast.success('Pedido realizado com sucesso!');
       router.push(`/order-success/${order.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
       toast.error('Erro ao processar pedido', {
         description: 'Tente novamente em alguns instantes',

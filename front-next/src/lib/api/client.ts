@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
       
       if (session) {
         // Usar o accessToken do backend que está salvo na sessão NextAuth
-        const backendToken = (session as any).backendAccessToken;
+        const backendToken = (session as { backendAccessToken?: string }).backendAccessToken;
         
         if (backendToken) {
           config.headers.Authorization = `Bearer ${backendToken}`;
@@ -49,7 +49,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error('[ApiClient] Erro 401 - Não autorizado:', {
         url: error.config?.url,
-        message: (error.response?.data as any)?.message,
+        message: (error.response?.data as { message?: string })?.message,
       });
       
       if (typeof window !== 'undefined') {

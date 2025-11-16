@@ -70,7 +70,7 @@ export default function NewOrganizationPage() {
 
       router.push('/dashboard/organizations');
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
       toast.error('Erro ao criar organização', {
         description:
           error.response?.data?.message ||

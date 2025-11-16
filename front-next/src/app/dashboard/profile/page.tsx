@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { User, Shield, Building2, Mail, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 
 const profileSchema = z.object({
   role: z.enum(['admin', 'ong_manager', 'ong_staff', 'customer']).optional(),
@@ -37,7 +38,6 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
   // Fetch current user
   const { data: currentUser, isLoading: isLoadingUser } = useQuery({
@@ -85,7 +85,7 @@ export default function ProfilePage() {
         setTimeout(() => window.location.reload(), 1500);
       }
     },
-    onError: (error: any) => {
+    onError: (error: Error & { response?: { data?: { message?: string } } }) => {
       toast.error('Erro ao atualizar perfil', {
         description:
           error.response?.data?.message ||
@@ -117,17 +117,17 @@ export default function ProfilePage() {
     <div className="p-8 space-y-8">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-        <a href="/" className="hover:text-gray-900 transition-colors">
+        <Link href="/" className="hover:text-gray-900 transition-colors">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
-        </a>
+        </Link>
         <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-        <a href="/dashboard" className="hover:text-gray-900 transition-colors">
+        <Link href="/dashboard" className="hover:text-gray-900 transition-colors">
           Visão Geral
-        </a>
+        </Link>
         <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
@@ -290,7 +290,7 @@ export default function ProfilePage() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {organizations?.map((org: any) => (
+                              {organizations?.map((org: { id: string; name: string }) => (
                                 <SelectItem key={org.id} value={org.id}>
                                   {org.name}
                                 </SelectItem>

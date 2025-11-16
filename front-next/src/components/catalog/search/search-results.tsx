@@ -85,7 +85,7 @@ export function SearchResults({
         <p className="text-sm text-gray-600 max-w-md">
           Não encontramos produtos que correspondam à busca{' '}
           {query && (
-            <span className="font-medium text-gray-900">"{query}"</span>
+            <span className="font-medium text-gray-900">&quot;{query}&quot;</span>
           )}
           . Tente usar palavras-chave diferentes ou ajustar os filtros.
         </p>

@@ -54,7 +54,7 @@ export function AddProductDialog({ trigger }: AddProductDialogProps) {
   const [open, setOpen] = useState(false);
   const createProduct = useCreateProduct();
 
-  const form = useForm<CreateProductDto>({
+  const form = useForm({
     resolver: zodResolver(createProductSchema),
     defaultValues: {
       name: '',

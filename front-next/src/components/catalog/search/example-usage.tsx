@@ -72,7 +72,7 @@ export function ExampleUsage() {
                 <div className="space-y-1 text-sm text-blue-800">
                   {appliedFilters.keyword && (
                     <p>
-                      <strong>Texto:</strong> "{appliedFilters.keyword}"
+                      <strong>Texto:</strong> &quot;{appliedFilters.keyword}&quot;
                     </p>
                   )}
                   {appliedFilters.category && (

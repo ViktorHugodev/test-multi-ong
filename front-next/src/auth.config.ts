@@ -55,26 +55,27 @@ export const authConfig = {
             backendAccessToken: accessToken,
             backendRefreshToken: refreshToken,
           };
-        } catch (error: any) {
-          console.error('[Auth] Erro ao autenticar:', error.response?.data || error.message);
+        } catch (error: unknown) {
+          const axiosError = error as { response?: { data?: unknown }; message?: string };
+          console.error('[Auth] Erro ao autenticar:', axiosError.response?.data || axiosError.message);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       // Na primeira autenticação, adicionar dados do usuário ao token
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = (user as any).role;
-        token.organizationId = (user as any).organizationId;
-        token.organization = (user as any).organization;
+        token.role = (user as { role?: string }).role;
+        token.organizationId = (user as { organizationId?: string | null }).organizationId;
+        token.organization = (user as { organization?: unknown }).organization;
         // Salvar tokens do backend no token JWT do NextAuth
-        token.backendAccessToken = (user as any).backendAccessToken;
-        token.backendRefreshToken = (user as any).backendRefreshToken;
+        token.backendAccessToken = (user as { backendAccessToken?: string }).backendAccessToken;
+        token.backendRefreshToken = (user as { backendRefreshToken?: string }).backendRefreshToken;
         
         console.log('[Auth] Token JWT criado com dados do backend');
       }
@@ -90,8 +91,8 @@ export const authConfig = {
         session.user.role = token.role as string;
         session.user.organizationId = token.organizationId as string | null;
         // Incluir tokens do backend na sessão
-        (session as any).backendAccessToken = token.backendAccessToken;
-        (session as any).backendRefreshToken = token.backendRefreshToken;
+        (session as { backendAccessToken?: unknown }).backendAccessToken = token.backendAccessToken;
+        (session as { backendRefreshToken?: unknown }).backendRefreshToken = token.backendRefreshToken;
       }
 
       return session;

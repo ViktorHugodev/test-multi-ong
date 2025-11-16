@@ -7,7 +7,14 @@ export interface AuthTokens {
 }
 
 export interface LoginResponse extends AuthTokens {
-  user: any; // Estrutura completa vem do backend (AuthService.sanitizeUser)
+  user: {
+    id: string;
+    email: string;
+    fullName?: string;
+    role?: string;
+    organizationId?: string | null;
+    organization?: unknown;
+  };
 }
 
 export const authApi = {

@@ -213,7 +213,7 @@ export default function CheckoutPage() {
               <CardContent className="px-6 pb-6">
                 <RadioGroup
                   defaultValue="pix"
-                  onValueChange={(value) => setValue('paymentMethod', value as any)}
+                  onValueChange={(value) => setValue('paymentMethod', value as 'pix' | 'credit_card' | 'boleto')}
                   className="space-y-4"
                 >
                   <div className="flex items-center space-x-4 p-4 border-2 border-border rounded-lg hover:bg-accent hover:border-primary/50 transition-colors cursor-pointer">
